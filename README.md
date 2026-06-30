@@ -43,4 +43,4 @@ Then navigate to `http://localhost:8000`
 
 ---
 
-Deployed on Vercel: [Your Live URL]
+Deployed on Vercel: https://evol-ring-configurator.vercel.app/
