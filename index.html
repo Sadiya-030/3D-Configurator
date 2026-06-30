@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;600;700&family=Pinyon+Script&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#E8E6DF;}
+  ::-webkit-scrollbar{width:0;height:0}
+  *{scrollbar-width:none;-ms-overflow-style:none;}
+  @keyframes evolFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes evolHint{0%,100%{opacity:.7}50%{opacity:.25}}
+  @keyframes evolSpin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+
+<div style="position:relative;width:100%;min-height:100vh;font-family:'Satoshi',sans-serif;color:#262626;background:{{ pageBg }};-webkit-font-smoothing:antialiased;overflow-x:hidden;">
+
+  <!-- META VIEW SWITCHER -->
+  <div style="position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;gap:4px;padding:5px;border-radius:13px;background:#ffffff;border:1px solid #E4E1D9;box-shadow:0 6px 24px rgba(0,0,0,.08);">
+    <sc-for list="{{ viewTabs }}" as="v" hint-placeholder-count="3">
+      <button onClick="{{ v.onClick }}" style="{{ v.style }}">{{ v.label }}</button>
+    </sc-for>
+  </div>
+
+  <!-- ================= DESKTOP CONFIGURATOR ================= -->
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="Desktop Configurator" style="position:relative;width:100%;height:100vh;min-height:760px;background:{{ stageBg }};overflow:hidden;">
+
+    <!-- TOP BAR -->
+    <div style="position:absolute;top:0;left:0;right:0;height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;z-index:30;">
+      <div style="display:flex;flex-direction:column;gap:1px;">
+        <div style="font-family:'Satoshi',sans-serif;font-size:16px;font-weight:500;letter-spacing:.4em;color:#262626;">EVOL</div>
+        <div style="font-family:'Satoshi',sans-serif;font-size:13px;color:#8E8E8E;line-height:1.2;">Love Begins with You</div>
+      </div>
+      <!-- collection tabs -->
+      <div style="display:flex;align-items:center;gap:4px;position:absolute;left:50%;transform:translateX(-50%);padding:5px;background:#F2EFE8;border-radius:999px;">
+        <sc-for list="{{ collectionTabs }}" as="ct" hint-placeholder-count="5">
+          <button onClick="{{ ct.onClick }}" style="{{ ct.style }}"><span style="display:flex;color:{{ ct.iconColor }};">{{ ct.iconEl }}</span>{{ ct.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <button onClick="{{ toggleWishlist }}" style="background:none;border:none;cursor:pointer;display:flex;color:{{ heartColor }};" title="Wishlist"><svg width="19" height="19" viewBox="0 0 24 24" fill="{{ heartFill }}" stroke="currentColor" stroke-width="1.6"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button style="background:none;border:none;cursor:pointer;display:flex;color:#8E8E8E;" title="Share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+        <div style="width:32px;height:32px;border-radius:50%;border:1px solid #D8D4CA;display:flex;align-items:center;justify-content:center;font-size:14px;font-family:'Satoshi',sans-serif;color:#666;">SM</div>
+      </div>
+    </div>
+
+    <!-- RING STEP INDICATOR -->
+    <sc-if value="{{ isRings }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;top:88px;left:0;width:calc(100% - 404px);display:flex;justify-content:center;z-index:28;pointer-events:none;">
+      <div style="display:flex;align-items:center;background:#fff;border:1px solid #E4E1D9;border-radius:999px;padding:7px 16px;box-shadow:0 4px 18px rgba(0,0,0,.06);pointer-events:auto;">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;">
+            <button onClick="{{ s.onClick }}" style="display:flex;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:4px;">
+              <span style="{{ s.dotStyle }}">{{ s.dotLabel }}</span>
+              <span style="{{ s.labelStyle }}">{{ s.label }}</span>
+            </button>
+            <span style="{{ s.connStyle }}"></span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- STAGE -->
+    <div data-fs-target style="position:absolute;top:76px;left:0;width:calc(100% - 404px);bottom:92px;display:flex;align-items:center;justify-content:center;z-index:{{ stageZ }};background:{{ stageBg }};">
+      <sc-if value="{{ isRings }}" hint-placeholder-val="{{ true }}">
+      <!-- camera controls top-right of stage -->
+      <div style="position:absolute;top:20px;right:30px;display:flex;gap:10px;z-index:20;">
+        <button onClick="{{ toggleFullscreen }}" title="Fullscreen" style="width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid #E4E1D9;box-shadow:0 3px 12px rgba(0,0,0,.06);color:#666;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      </div>
+
+      <!-- quick-view chips (kept above the draggable 3D canvas so they stay clickable) -->
+      <div style="position:absolute;top:92px;left:30px;display:flex;gap:6px;z-index:20;">
+        <sc-for list="{{ quickViews }}" as="q" hint-placeholder-count="4">
+          <button onClick="{{ q.onClick }}" style="{{ q.style }}">{{ q.label }}</button>
+        </sc-for>
+      </div>
+
+      <!-- RING RENDER (live 3D) -->
+      <div style="{{ ringBoxStyle }}">
+        <div ref="{{ stageRef }}" style="position:absolute;inset:0;z-index:3;"></div>
+        <div style="position:absolute;left:50%;top:90%;transform:translate(-50%,-50%);width:230px;height:36px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.1),transparent 70%);filter:blur(4px);pointer-events:none;z-index:2;"></div>
+        <sc-if value="{{ fsOpen }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ toggleFullscreen }}" title="Exit Fullscreen" style="position:absolute;top:20px;right:24px;z-index:8;width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid #E4E1D9;box-shadow:0 4px 16px rgba(0,0,0,.12);color:#262626;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+        </sc-if>
+        <sc-if value="{{ ringLoading }}" hint-placeholder-val="{{ true }}">
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:4;pointer-events:none;">
+          <span style="width:38px;height:38px;border-radius:50%;border:2px solid rgba(0,0,0,.12);border-top-color:#262626;animation:evolSpin 1s linear infinite;"></span>
+          <span style="font-size:14px;letter-spacing:.2em;color:#9A958B;font-family:'Satoshi',sans-serif;">RENDERING RING</span>
+        </div>
+        </sc-if>
+      </div>
+
+      <!-- 360 hint -->
+      <div style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;color:#9A958B;font-size:14px;letter-spacing:.08em;font-family:'Satoshi',sans-serif;animation:evolHint 3.4s ease-in-out infinite;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4a8 5 0 1 0 0 10 8 5 0 0 0 0-10z"/><path d="M8.5 9l-2 2 2 2"/></svg>360° · Drag to Rotate</div>
+      <!-- updating indicator (shown briefly while the ring re-renders) -->
+      <sc-if value="{{ updating }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:30px;bottom:58px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.85);backdrop-filter:blur(6px);border:1px solid #E4E1D9;border-radius:999px;padding:9px 16px 9px 13px;box-shadow:0 8px 24px rgba(0,0,0,.07);z-index:20;">
+        <span style="width:15px;height:15px;border-radius:50%;border:2px solid rgba(0,0,0,.14);border-top-color:#262626;animation:evolSpin .8s linear infinite;"></span>
+        <span style="font-family:'Satoshi',sans-serif;font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#5E5E5E;">Updating Ring</span>
+      </div>
+      </sc-if>
+      </sc-if>
+      <sc-if value="{{ isNonRing }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center;padding:24px;">
+        <div style="width:152px;height:152px;border-radius:50%;background:#fff;border:1px solid #E4E1D9;box-shadow:0 14px 44px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;color:#C2A98F;"><span style="display:flex;">{{ catBigIcon }}</span></div>
+        <div style="font-family:'Satoshi',sans-serif;font-size:30px;font-weight:600;color:#262626;">{{ collectionName }} Configurator</div>
+        <div style="max-width:380px;font-family:'Satoshi',sans-serif;font-size:14px;color:#9A958B;line-height:1.65;">Configure Every Detail in the Panel at Right.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+          <span style="padding:8px 14px;border-radius:999px;background:#fff;border:1px solid #E4E1D9;color:#8E8E8E;font-size:14px;font-family:'Satoshi',sans-serif;">True-Scale Context · Soon</span>
+          <span style="padding:8px 14px;border-radius:999px;background:#fff;border:1px solid #E4E1D9;color:#8E8E8E;font-size:14px;font-family:'Satoshi',sans-serif;">Studio Render · Soon</span>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div style="position:absolute;top:76px;right:0;width:404px;bottom:82px;background:#ffffff;border:1px solid #E4E1D9;box-shadow:-14px 0 44px rgba(0,0,0,.06);border-radius:22px 0 0 22px;display:flex;flex-direction:column;z-index:25;overflow:hidden;">
+      <div style="padding:22px 24px 16px;border-bottom:1px solid #EEEBE3;">
+        <div style="font-family:'Satoshi',sans-serif;font-size:22px;font-weight:600;letter-spacing:.01em;color:#262626;">{{ panelTitle }}</div>
+        <div style="font-family:'Satoshi',sans-serif;font-size:14px;color:#9A958B;margin-top:3px;">{{ panelSubtitle }}</div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:6px 24px 28px;">
+
+        <!-- NON-RING CATEGORY CONFIGURATOR -->
+        <sc-if value="{{ isNonRing }}" hint-placeholder-val="{{ false }}">
+        <div style="opacity:1;">
+          <sc-for list="{{ catGroups }}" as="g" hint-placeholder-count="9">
+            <div style="margin-top:22px;">
+              <div style="font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">{{ g.label }}</div>
+              <sc-if value="{{ g.isCardText }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3"><button onClick="{{ it.onClick }}" style="{{ it.cardStyle }}">{{ it.label }}</button></sc-for>
+              </div>
+              </sc-if>
+              <sc-if value="{{ g.isChips }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="6"><button onClick="{{ it.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;"><span style="{{ it.chipStyle }}">{{ it.iconEl }}</span><span style="{{ it.chipLabelStyle }}">{{ it.label }}</span></button></sc-for>
+              </div>
+              </sc-if>
+              <sc-if value="{{ g.isPills }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:12px;">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4"><button onClick="{{ it.onClick }}" style="{{ it.pillStyle }}">{{ it.label }}</button></sc-for>
+              </div>
+              </sc-if>
+              <sc-if value="{{ g.isSwatches }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4"><button onClick="{{ it.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;"><span style="{{ it.swatchStyle }}"></span><span style="{{ it.labelStyle }}">{{ it.label }}</span></button></sc-for>
+              </div>
+              </sc-if>
+              <sc-if value="{{ g.isStoneSwatches }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:13px;flex-wrap:wrap;margin-top:14px;">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="7"><button onClick="{{ it.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;"><span style="{{ it.swatchStyle }}"></span><span style="{{ it.labelStyle }}">{{ it.label }}</span></button></sc-for>
+              </div>
+              </sc-if>
+              <sc-if value="{{ g.isText }}" hint-placeholder-val="{{ false }}">
+              <input value="{{ g.textValue }}" onInput="{{ g.onText }}" placeholder="{{ g.placeholder }}" style="width:100%;margin-top:12px;padding:12px 16px;border-radius:10px;background:#F4F2EC;border:1px solid #DDD9CF;color:#262626;font-size:14px;font-family:'Satoshi',sans-serif;outline:none;" />
+              </sc-if>
+            </div>
+          </sc-for>
+          <button style="margin-top:26px;width:100%;padding:14px;border-radius:999px;background:#262626;border:none;color:#fff;font-size:14px;letter-spacing:.04em;cursor:pointer;font-family:'Satoshi',sans-serif;">Save &amp; Review →</button>
+        </div>
+        </sc-if>
+
+        <!-- STEP 1: SETTING -->
+        <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+        <div style="opacity:1;">
+          <!-- Ring Model -->
+          <div style="margin-top:18px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Ring Model · Live 3D</div>
+          <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;">
+            <sc-for list="{{ ringModelItems }}" as="it" hint-placeholder-count="2"><button onClick="{{ it.onClick }}" style="{{ it.pillStyle }}">{{ it.label }}</button></sc-for>
+          </div>
+          <!-- Ring Style -->
+          <div style="margin-top:24px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Ring Style</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">
+            <sc-for list="{{ styleItems }}" as="it" hint-placeholder-count="6">
+              <button onClick="{{ it.onClick }}" style="{{ it.cardStyle }}">
+                <span style="display:flex;height:24px;align-items:center;justify-content:center;color:{{ it.iconColor }};">{{ it.iconEl }}</span>
+                <span style="{{ it.labelStyle }}">{{ it.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <!-- Head Type -->
+          <div style="margin-top:24px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Head Type</div>
+          <div style="display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;">
+            <sc-for list="{{ headItems }}" as="it" hint-placeholder-count="5">
+              <button onClick="{{ it.onClick }}" style="{{ it.rowCardStyle }}">
+                <span style="display:flex;height:22px;align-items:center;justify-content:center;color:{{ it.iconColor }};">{{ it.iconEl }}</span>
+                <span style="{{ it.rowLabelStyle }}">{{ it.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <!-- Shank Type -->
+          <div style="margin-top:20px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Shank Type</div>
+          <div style="display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;">
+            <sc-for list="{{ shankItems }}" as="it" hint-placeholder-count="5">
+              <button onClick="{{ it.onClick }}" style="{{ it.rowCardStyle }}">
+                <span style="display:flex;height:22px;align-items:center;justify-content:center;color:{{ it.iconColor }};">{{ it.iconEl }}</span>
+                <span style="{{ it.rowLabelStyle }}">{{ it.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <!-- Shank Width -->
+          <div style="margin-top:24px;display:flex;justify-content:space-between;align-items:baseline;">
+            <span style="font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Shank Width</span>
+            <span style="font-size:14px;color:#262626;font-family:'Satoshi',sans-serif;">{{ config.width }}</span>
+          </div>
+          <div style="position:relative;height:36px;margin-top:14px;display:flex;align-items:center;">
+            <div style="position:absolute;left:6px;right:6px;height:1px;background:#D8D4CA;"></div>
+            <div style="position:relative;display:flex;justify-content:space-between;width:100%;">
+              <sc-for list="{{ widthStops }}" as="w" hint-placeholder-count="6">
+                <button onClick="{{ w.onClick }}" title="{{ w.label }}" style="position:relative;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;">
+                  <span style="{{ w.dotStyle }}"></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <sc-for list="{{ widthStops }}" as="w" hint-placeholder-count="6">
+              <span style="{{ w.labelStyle }}">{{ w.label }}</span>
+            </sc-for>
+          </div>
+
+          <!-- (Diamond shape, carat, colour & quality live in Step 2 · Choose Diamond) -->
+
+          <!-- Metal -->
+          <div style="margin-top:26px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Metal · Band</div>
+          <div style="display:flex;gap:16px;margin-top:14px;">
+            <sc-for list="{{ bandMetals }}" as="m" hint-placeholder-count="4">
+              <button onClick="{{ m.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;">
+                <span style="{{ m.swatchStyle }}"></span>
+                <span style="{{ m.labelStyle }}">{{ m.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="margin-top:18px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Metal · Head</span>
+            <button onClick="{{ matchBand }}" style="background:none;border:none;color:#8E8E8E;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Satoshi',sans-serif;"><span style="{{ matchDotStyle }}"></span>Match Band</button>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:14px;">
+            <sc-for list="{{ headMetals }}" as="m" hint-placeholder-count="4">
+              <button onClick="{{ m.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;">
+                <span style="{{ m.swatchStyle }}"></span>
+                <span style="{{ m.labelStyle }}">{{ m.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ showSecondBand }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:18px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Metal · Second Band</span>
+            <button onClick="{{ matchBand2 }}" style="background:none;border:none;color:#8E8E8E;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Satoshi',sans-serif;"><span style="{{ matchDot2Style }}"></span>Match Band</button>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:14px;">
+            <sc-for list="{{ band2Metals }}" as="m" hint-placeholder-count="4">
+              <button onClick="{{ m.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;">
+                <span style="{{ m.swatchStyle }}"></span>
+                <span style="{{ m.labelStyle }}">{{ m.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          </sc-if>
+          <div style="display:flex;gap:18px;margin-top:18px;align-items:center;">
+            <div style="display:flex;gap:6px;">
+              <sc-for list="{{ karatItems }}" as="it" hint-placeholder-count="2">
+                <button onClick="{{ it.onClick }}" style="{{ it.pillStyle }}">{{ it.label }}</button>
+              </sc-for>
+            </div>
+            <div style="width:1px;height:20px;background:#E4E1D9;"></div>
+            <div style="display:flex;gap:12px;">
+              <sc-for list="{{ finishItems }}" as="it" hint-placeholder-count="3">
+                <button onClick="{{ it.onClick }}" style="{{ it.textChipStyle }}">{{ it.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- Ring Size -->
+          <div style="margin-top:26px;display:flex;justify-content:space-between;align-items:baseline;">
+            <span style="font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Ring Size</span>
+            <button style="background:none;border:none;color:#8E8E8E;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:'Satoshi',sans-serif;">Size Guide</button>
+          </div>
+          <div style="position:relative;margin-top:12px;">
+            <button onClick="{{ toggleSize }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:10px;background:#F4F2EC;border:1px solid #DDD9CF;color:#262626;font-size:14px;cursor:pointer;font-family:'Satoshi',sans-serif;">{{ config.size }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A958B" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+            <sc-if value="{{ sizeOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:46px;left:0;right:0;max-height:160px;overflow-y:auto;border-radius:10px;background:#fff;border:1px solid #E4E1D9;box-shadow:0 12px 32px rgba(0,0,0,.12);z-index:5;padding:4px;">
+              <sc-for list="{{ sizeOptions }}" as="s" hint-placeholder-count="6">
+                <button onClick="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button>
+              </sc-for>
+            </div>
+            </sc-if>
+          </div>
+
+          <!-- Engraving -->
+          <div style="margin-top:24px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Engraving</div>
+          <div style="position:relative;margin-top:12px;">
+            <input value="{{ config.engraving }}" onInput="{{ onEngrave }}" maxLength="20" placeholder="Engraving · Up To 20 Characters" style="width:100%;padding:12px 52px 12px 16px;border-radius:10px;background:#F4F2EC;border:1px solid #DDD9CF;color:#262626;font-size:14px;font-family:'Satoshi',sans-serif;outline:none;" />
+            <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:14px;color:#9A958B;">{{ charCount }}/20</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <sc-for list="{{ fontChips }}" as="f" hint-placeholder-count="3">
+              <button onClick="{{ f.onClick }}" style="{{ f.style }}"><span style="{{ f.previewStyle }}">Abc</span><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;letter-spacing:.04em;margin-top:3px;">{{ f.label }}</span></button>
+            </sc-for>
+          </div>
+
+          <button onClick="{{ nextStep }}" style="margin-top:26px;width:100%;padding:14px;border-radius:999px;background:#262626;border:none;color:#fff;font-size:14px;letter-spacing:.04em;cursor:pointer;font-family:'Satoshi',sans-serif;">Continue to Diamond →</button>
+        </div>
+        </sc-if>
+
+        <!-- STEP 2: DIAMOND -->
+        <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+        <div style="opacity:1;">
+          <div style="margin-top:18px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Diamond Shape</div>
+          <div style="display:flex;gap:14px;justify-content:space-between;margin-top:14px;">
+            <sc-for list="{{ shapeItems }}" as="it" hint-placeholder-count="6">
+              <button onClick="{{ it.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;">
+                <span style="{{ it.chipStyle }}">{{ it.iconEl }}</span>
+                <span style="{{ it.chipLabelStyle }}">{{ it.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="margin-top:24px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Carat</div>
+          <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;">
+            <sc-for list="{{ caratItems }}" as="it" hint-placeholder-count="5">
+              <button onClick="{{ it.onClick }}" style="{{ it.pillStyle }}">{{ it.label }}</button>
+            </sc-for>
+          </div>
+          <div style="margin-top:24px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Quality Tier</div>
+          <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;">
+            <sc-for list="{{ qualityItems }}" as="it" hint-placeholder-count="3">
+              <button onClick="{{ it.onClick }}" style="{{ it.pillStyle }}">{{ it.label }}</button>
+            </sc-for>
+          </div>
+          <!-- Centre Diamond Colour -->
+          <div style="margin-top:24px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Centre Stone · Colour</div>
+          <div style="display:flex;gap:13px;margin-top:14px;flex-wrap:wrap;">
+            <sc-for list="{{ centreGems }}" as="g" hint-placeholder-count="6">
+              <button onClick="{{ g.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;"><span style="{{ g.swatchStyle }}"></span><span style="{{ g.labelStyle }}">{{ g.label }}</span></button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ hasPaveNow }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:22px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Accent Stones · Colour</div>
+            <div style="display:flex;gap:13px;margin-top:14px;flex-wrap:wrap;">
+              <sc-for list="{{ accentGems }}" as="g" hint-placeholder-count="6">
+                <button onClick="{{ g.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;"><span style="{{ g.swatchStyle }}"></span><span style="{{ g.labelStyle }}">{{ g.label }}</span></button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="margin-top:26px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Available · Lab-Grown</span>
+            <button onClick="{{ toggleCompare }}" style="{{ compareToggleStyle }}">Compare</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
+            <sc-for list="{{ inventory }}" as="d" hint-placeholder-count="5">
+              <button onClick="{{ d.onClick }}" style="{{ d.style }}">
+                <span style="display:flex;align-items:center;gap:12px;">
+                  <span style="display:flex;width:30px;height:30px;align-items:center;justify-content:center;color:#666;">{{ d.iconEl }}</span>
+                  <span style="display:flex;flex-direction:column;gap:3px;text-align:left;">
+                    <span style="font-size:14px;color:#262626;font-family:'Satoshi',sans-serif;">{{ d.caratLabel }}</span>
+                    <span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">{{ d.sub }}</span>
+                  </span>
+                </span>
+                <span style="font-size:15px;color:#262626;font-family:'Satoshi',sans-serif;font-weight:600;">{{ d.priceLabel }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <button onClick="{{ nextStep }}" style="margin-top:22px;width:100%;padding:14px;border-radius:999px;background:#262626;border:none;color:#fff;font-size:14px;letter-spacing:.04em;cursor:pointer;font-family:'Satoshi',sans-serif;">Continue to Review →</button>
+        </div>
+        </sc-if>
+
+        <!-- STEP 3: COMPLETE -->
+        <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+        <div style="opacity:1;">
+          <div style="margin-top:18px;font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Your Configuration</div>
+          <div style="margin-top:14px;border-radius:12px;border:1px solid #E4E1D9;overflow:hidden;">
+            <sc-for list="{{ summary }}" as="r" hint-placeholder-count="8">
+              <div style="{{ r.rowStyle }}">
+                <span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">{{ r.label }}</span>
+                <span style="display:flex;align-items:center;gap:10px;"><span style="font-size:14px;color:#262626;font-family:'Satoshi',sans-serif;">{{ r.value }}</span><button onClick="{{ r.onEdit }}" style="background:none;border:none;color:#9A958B;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:'Satoshi',sans-serif;">Edit</button></span>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- matching band -->
+          <div style="margin-top:20px;display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;background:#FAF8F3;border:1px solid #E4E1D9;">
+            <div style="flex:1;">
+              <div style="font-family:'Satoshi',sans-serif;font-size:17px;font-weight:600;color:#262626;">Complete the Pair</div>
+              <div style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;margin-top:2px;">Matching Wedding Band</div>
+            </div>
+            <button style="padding:9px 14px;border-radius:999px;background:#fff;border:1px solid #D8D4CA;color:#262626;font-size:14px;cursor:pointer;white-space:nowrap;font-family:'Satoshi',sans-serif;">Add ₹62,000</button>
+          </div>
+
+          <!-- trust strip -->
+          <div style="margin-top:20px;display:flex;flex-direction:column;gap:9px;padding-top:18px;border-top:1px solid #EEEBE3;">
+            <sc-for list="{{ trustItems }}" as="t" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:9px;font-size:14px;color:#8E8E8E;font-family:'Satoshi',sans-serif;"><span style="color:{{ accent }};display:flex;">{{ t.iconEl }}</span>{{ t.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+      </div>
+    </div>
+
+    <!-- BOTTOM BAR (full width) -->
+    <div style="position:absolute;bottom:0;left:0;right:0;z-index:26;background:#fff;border-top:1px solid #E4E1D9;box-shadow:0 -8px 30px rgba(0,0,0,.05);padding:12px 40px;display:flex;align-items:center;justify-content:space-between;gap:28px;">
+      <div style="position:relative;display:flex;align-items:center;gap:14px;min-width:190px;">
+        <span style="font-family:'Satoshi',sans-serif;font-size:24px;font-weight:600;color:#262626;line-height:1;">{{ priceFormatted }}</span>
+        <span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">Incl. GST</span>
+        <sc-if value="{{ isRings }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ toggleBreakup }}" style="background:none;border:none;color:#8E8E8E;font-size:14px;cursor:pointer;font-family:'Satoshi',sans-serif;padding:0;white-space:nowrap;">{{ breakupLabel }}</button>
+        <sc-if value="{{ showBreakup }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;bottom:calc(100% + 14px);left:0;background:#fff;border:1px solid #E4E1D9;border-radius:14px;box-shadow:0 16px 44px rgba(0,0,0,.16);padding:16px 18px;min-width:240px;z-index:40;">
+          <div style="display:flex;justify-content:space-between;gap:28px;font-size:14px;color:#666;font-family:'Satoshi',sans-serif;margin-bottom:9px;"><span>Metal</span><span style="color:#262626;">{{ metalFormatted }}</span></div>
+          <div style="display:flex;justify-content:space-between;gap:28px;font-size:14px;color:#666;font-family:'Satoshi',sans-serif;margin-bottom:9px;"><span>Diamond</span><span style="color:#262626;">{{ diamondFormatted }}</span></div>
+          <div style="display:flex;justify-content:space-between;gap:28px;font-size:14px;color:#666;font-family:'Satoshi',sans-serif;"><span>Making</span><span style="color:#262626;">{{ makingFormatted }}</span></div>
+          <div style="border-top:1px solid #EEEBE3;margin-top:11px;padding-top:11px;display:flex;justify-content:space-between;gap:28px;font-size:14px;font-weight:600;color:#262626;font-family:'Satoshi',sans-serif;"><span>Total</span><span>{{ priceFormatted }}</span></div>
+        </div>
+        </sc-if>
+        </sc-if>
+        <sc-if value="{{ isRings }}" hint-placeholder-val="{{ true }}">
+        <span style="width:1px;height:20px;background:#E4E1D9;"></span>
+        <button style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#8E8E8E;font-size:14px;cursor:pointer;font-family:'Satoshi',sans-serif;padding:0;white-space:nowrap;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M3 7l9-4 9 4M5 7v6a7 7 0 0 0 14 0V7"/></svg>Calculate Weight</button>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:20px;">
+        <div style="display:flex;gap:16px;">
+          <button style="background:none;border:none;color:#8E8E8E;font-size:14px;cursor:pointer;font-family:'Satoshi',sans-serif;">Save Design</button>
+          <button style="background:none;border:none;color:#8E8E8E;font-size:14px;cursor:pointer;font-family:'Satoshi',sans-serif;">Share Link</button>
+          <button style="background:none;border:none;color:#8E8E8E;font-size:14px;cursor:pointer;font-family:'Satoshi',sans-serif;">Design Card (PDF)</button>
+        </div>
+        <button onClick="{{ toggleWishlist }}" style="width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid #D8D4CA;cursor:pointer;display:flex;align-items:center;justify-content:center;color:{{ heartColor }};"><svg width="18" height="18" viewBox="0 0 24 24" fill="{{ heartFill }}" stroke="currentColor" stroke-width="1.6"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <button style="display:flex;align-items:center;gap:9px;padding:12px 32px;border-radius:999px;background:{{ accent }};border:none;color:#fff;font-size:14px;font-weight:500;letter-spacing:.02em;cursor:pointer;font-family:'Satoshi',sans-serif;box-shadow:0 8px 24px rgba(159,11,16,.26);">Add to Bag</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= MOBILE CONFIGURATOR ================= -->
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Mobile Configurator" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:60px 20px 80px;background:radial-gradient(circle at 50% 30%,#F2EFE8,#E2E0D9);">
+    <div style="position:relative;width:392px;height:812px;border-radius:46px;background:#fff;border:10px solid #2B2926;box-shadow:0 36px 90px rgba(0,0,0,.28),0 0 0 1px rgba(0,0,0,.04);overflow:hidden;font-family:'Satoshi',sans-serif;">
+      <!-- notch -->
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#2B2926;border-radius:0 0 16px 16px;z-index:40;"></div>
+      <!-- scrollable inner -->
+      <div data-fs-target style="position:absolute;inset:0;overflow-y:auto;display:flex;flex-direction:column;">
+        <!-- TOP BAR -->
+        <div style="position:sticky;top:0;z-index:35;background:#F6F3EC;border-bottom:1px solid #E4E1D9;padding:30px 14px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;">
+          <button onClick="{{ toggleMobileMenu }}" style="width:34px;height:34px;border-radius:10px;background:#fff;border:1px solid #D8D4CA;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#262626;flex-shrink:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+          <div style="display:flex;flex-direction:column;gap:1px;align-items:center;">
+            <div style="font-family:'Satoshi',sans-serif;font-size:15px;font-weight:500;letter-spacing:.4em;color:#262626;line-height:1;">EVOL</div>
+            <div style="font-family:'Satoshi',sans-serif;font-size:10px;color:#8E8E8E;line-height:1.2;">Love Begins with You</div>
+          </div>
+          <button onClick="{{ toggleWishlist }}" style="width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid #D8D4CA;cursor:pointer;display:flex;align-items:center;justify-content:center;color:{{ heartColor }};flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="{{ heartFill }}" stroke="currentColor" stroke-width="1.6"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        </div>
+        <!-- HAMBURGER MENU OVERLAY -->
+        <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closeMobileMenu }}" style="position:absolute;inset:0;z-index:60;background:rgba(20,18,16,.34);backdrop-filter:blur(2px);"></div>
+        <div style="position:absolute;top:0;left:0;bottom:0;width:248px;z-index:61;background:#fff;box-shadow:18px 0 50px rgba(0,0,0,.22);display:flex;flex-direction:column;padding:30px 16px 18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div style="font-family:'Satoshi',sans-serif;font-size:15px;font-weight:500;letter-spacing:.4em;color:#262626;">EVOL</div>
+            <button onClick="{{ closeMobileMenu }}" style="width:30px;height:30px;border-radius:50%;background:#F4F2EC;border:1px solid #E4E1D9;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#666;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+          </div>
+          <div style="font-family:'Satoshi',sans-serif;font-size:11px;color:#9A958B;margin-bottom:18px;letter-spacing:.04em;">Love Begins with You</div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <sc-for list="{{ collectionMenu }}" as="ct" hint-placeholder-count="5">
+              <button onClick="{{ ct.onClickMenu }}" style="{{ ct.menuStyle }}"><span style="display:flex;color:{{ ct.iconColor }};">{{ ct.iconEl }}</span>{{ ct.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+        <!-- STAGE -->
+        <div style="position:relative;height:392px;flex-shrink:0;background:radial-gradient(120% 80% at 50% 44%,#F6F3EC 0%,#E4E2DB 70%);overflow:hidden;">
+          <sc-if value="{{ isRings }}" hint-placeholder-val="{{ true }}">
+          <!-- compact stepper -->
+          <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;background:#fff;border:1px solid #E4E1D9;border-radius:999px;padding:4px 9px;box-shadow:0 4px 18px rgba(0,0,0,.06);">
+            <sc-for list="{{ mobileSteps }}" as="s" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;">
+                <button onClick="{{ s.onClick }}" style="display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;">
+                  <span style="{{ s.dotStyle }}">{{ s.dotLabel }}</span>
+                  <span style="{{ s.labelStyle }}">{{ s.label }}</span>
+                </button>
+                <span style="{{ s.connStyle }}"></span>
+              </div>
+            </sc-for>
+          </div>
+          <!-- fullscreen -->
+          <button onClick="{{ toggleFullscreen }}" title="Fullscreen" style="position:absolute;top:9px;right:12px;z-index:21;width:32px;height:32px;border-radius:50%;background:#fff;border:1px solid #E4E1D9;box-shadow:0 3px 12px rgba(0,0,0,.06);color:#666;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+          <div style="{{ ringBoxStyleM }}">
+            <div ref="{{ stageRef }}" style="position:absolute;inset:0;z-index:3;"></div>
+            <sc-if value="{{ fsOpen }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ toggleFullscreen }}" title="Exit Fullscreen" style="position:absolute;top:20px;right:20px;z-index:8;width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid #E4E1D9;box-shadow:0 4px 16px rgba(0,0,0,.12);color:#262626;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+            </sc-if>
+            <sc-if value="{{ ringLoading }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:4;pointer-events:none;"><span style="width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,0,0,.12);border-top-color:#262626;animation:evolSpin 1s linear infinite;"></span><span style="font-size:11px;letter-spacing:.18em;color:#9A958B;font-family:'Satoshi',sans-serif;">RENDERING RING</span></div>
+            </sc-if>
+          </div>
+          <!-- view chips (sit a little above the sheet) -->
+          <div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:5px;">
+            <sc-for list="{{ quickViewsM }}" as="q" hint-placeholder-count="4">
+              <button onClick="{{ q.onClick }}" style="{{ q.style }}">{{ q.label }}</button>
+            </sc-for>
+          </div>
+          <!-- updating indicator (compact) -->
+          <sc-if value="{{ updating }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:10px;top:54px;display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.88);backdrop-filter:blur(6px);border:1px solid #E4E1D9;border-radius:999px;padding:6px 12px 6px 9px;box-shadow:0 6px 18px rgba(0,0,0,.08);z-index:20;">
+            <span style="width:12px;height:12px;border-radius:50%;border:2px solid rgba(0,0,0,.14);border-top-color:#262626;animation:evolSpin .8s linear infinite;"></span>
+            <span style="font-family:'Satoshi',sans-serif;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#5E5E5E;">Updating</span>
+          </div>
+          </sc-if>
+          </sc-if>
+          <sc-if value="{{ isNonRing }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;text-align:center;padding:20px;">
+            <div style="width:104px;height:104px;border-radius:50%;background:#fff;border:1px solid #E4E1D9;box-shadow:0 14px 44px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;color:#C2A98F;"><span style="display:flex;">{{ catBigIcon }}</span></div>
+            <div style="font-family:'Satoshi',sans-serif;font-size:22px;font-weight:600;color:#262626;">{{ collectionName }} Configurator</div>
+          </div>
+          </sc-if>
+        </div>
+        <!-- SHEET -->
+        <div style="flex:1;background:#fff;border-radius:22px 22px 0 0;margin-top:-16px;z-index:10;border-top:1px solid #E4E1D9;padding:0 14px 110px;">
+          <div style="display:flex;justify-content:center;padding:7px 0 2px;"><span style="width:32px;height:3px;border-radius:2px;background:#D8D4CA;"></span></div>
+          <div style="padding:5px 0 4px;">
+            <div style="font-family:'Satoshi',sans-serif;font-size:18px;font-weight:600;color:#262626;">{{ panelTitle }}</div>
+            <div style="font-family:'Satoshi',sans-serif;font-size:12px;color:#9A958B;margin-top:1px;">{{ panelSubtitle }}</div>
+          </div>
+          <!-- NON-RING -->
+          <sc-if value="{{ isNonRing }}" hint-placeholder-val="{{ false }}">
+          <div style="opacity:1;">
+            <sc-for list="{{ catGroups }}" as="g" hint-placeholder-count="9">
+              <div style="margin-top:16px;">
+                <div style="font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">{{ g.label }}</div>
+                <sc-if value="{{ g.isCardText }}" hint-placeholder-val="{{ false }}">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px;">
+                  <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3"><button onClick="{{ it.onClick }}" style="{{ it.cardStyle }}">{{ it.label }}</button></sc-for>
+                </div>
+                </sc-if>
+                <sc-if value="{{ g.isChips }}" hint-placeholder-val="{{ false }}">
+                <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:10px;justify-items:center;">
+                  <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="6"><button onClick="{{ it.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;"><span style="{{ it.chipStyle }}">{{ it.iconEl }}</span><span style="{{ it.chipLabelStyle }}">{{ it.label }}</span></button></sc-for>
+                </div>
+                </sc-if>
+                <sc-if value="{{ g.isPills }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;">
+                  <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4"><button onClick="{{ it.onClick }}" style="{{ it.pillStyle }}">{{ it.label }}</button></sc-for>
+                </div>
+                </sc-if>
+                <sc-if value="{{ g.isSwatches }}" hint-placeholder-val="{{ false }}">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:11px;justify-items:center;">
+                  <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4"><button onClick="{{ it.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;"><span style="{{ it.swatchStyle }}"></span><span style="{{ it.labelStyle }}">{{ it.label }}</span></button></sc-for>
+                </div>
+                </sc-if>
+                <sc-if value="{{ g.isStoneSwatches }}" hint-placeholder-val="{{ false }}">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:11px;justify-items:center;">
+                  <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="6"><button onClick="{{ it.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;"><span style="{{ it.swatchStyle }}"></span><span style="{{ it.labelStyle }}">{{ it.label }}</span></button></sc-for>
+                </div>
+                </sc-if>
+                <sc-if value="{{ g.isText }}" hint-placeholder-val="{{ false }}">
+                <input value="{{ g.textValue }}" onInput="{{ g.onText }}" placeholder="{{ g.placeholder }}" style="width:100%;margin-top:9px;padding:10px 13px;border-radius:10px;background:#F4F2EC;border:1px solid #DDD9CF;color:#262626;font-size:12px;font-family:'Satoshi',sans-serif;outline:none;" />
+                </sc-if>
+              </div>
+            </sc-for>
+            <button style="margin-top:20px;width:100%;padding:12px;border-radius:999px;background:#262626;border:none;color:#fff;font-size:12px;letter-spacing:.04em;cursor:pointer;font-family:'Satoshi',sans-serif;">Save &amp; Review →</button>
+          </div>
+          </sc-if>
+          <!-- STEP 1 -->
+          <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+          <div style="opacity:1;">
+            <div style="margin-top:13px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Ring Model · Live 3D</div>
+            <div style="display:flex;gap:5px;margin-top:9px;flex-wrap:wrap;">
+              <sc-for list="{{ ringModelItems }}" as="it" hint-placeholder-count="2"><button onClick="{{ it.onClick }}" style="{{ it.pillStyle }}">{{ it.label }}</button></sc-for>
+            </div>
+            <div style="margin-top:16px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Ring Style</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px;">
+              <sc-for list="{{ styleItems }}" as="it" hint-placeholder-count="6">
+                <button onClick="{{ it.onClick }}" style="{{ it.cardStyle }}"><span style="display:flex;height:20px;align-items:center;justify-content:center;color:{{ it.iconColor }};">{{ it.iconEl }}</span><span style="{{ it.labelStyle }}">{{ it.label }}</span></button>
+              </sc-for>
+            </div>
+            <div style="margin-top:16px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Head Type</div>
+            <div style="display:flex;gap:7px;overflow-x:auto;padding:10px 0 4px;">
+              <sc-for list="{{ headItems }}" as="it" hint-placeholder-count="5">
+                <button onClick="{{ it.onClick }}" style="{{ it.rowCardStyle }}"><span style="display:flex;height:20px;align-items:center;justify-content:center;color:{{ it.iconColor }};">{{ it.iconEl }}</span><span style="{{ it.rowLabelStyle }}">{{ it.label }}</span></button>
+              </sc-for>
+            </div>
+            <div style="margin-top:16px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Shank Type</div>
+            <div style="display:flex;gap:7px;overflow-x:auto;padding:10px 0 4px;">
+              <sc-for list="{{ shankItems }}" as="it" hint-placeholder-count="5">
+                <button onClick="{{ it.onClick }}" style="{{ it.rowCardStyle }}"><span style="display:flex;height:20px;align-items:center;justify-content:center;color:{{ it.iconColor }};">{{ it.iconEl }}</span><span style="{{ it.rowLabelStyle }}">{{ it.label }}</span></button>
+              </sc-for>
+            </div>
+            <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:baseline;">
+              <span style="font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Shank Width</span>
+              <span style="font-size:12px;color:#262626;font-family:'Satoshi',sans-serif;">{{ config.width }}</span>
+            </div>
+            <div style="position:relative;height:30px;margin-top:10px;display:flex;align-items:center;">
+              <div style="position:absolute;left:6px;right:6px;height:1px;background:#D8D4CA;"></div>
+              <div style="position:relative;display:flex;justify-content:space-between;width:100%;">
+                <sc-for list="{{ widthStops }}" as="w" hint-placeholder-count="6">
+                  <button onClick="{{ w.onClick }}" title="{{ w.label }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;"><span style="{{ w.dotStyle }}"></span></button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:3px;">
+              <sc-for list="{{ widthStops }}" as="w" hint-placeholder-count="6"><span style="{{ w.labelStyle }}">{{ w.label }}</span></sc-for>
+            </div>
+            <div style="margin-top:20px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Metal · Band</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:11px;justify-items:center;">
+              <sc-for list="{{ bandMetals }}" as="m" hint-placeholder-count="4">
+                <button onClick="{{ m.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;"><span style="{{ m.swatchStyle }}"></span><span style="{{ m.labelStyle }}">{{ m.label }}</span></button>
+              </sc-for>
+            </div>
+            <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Metal · Head</span>
+              <button onClick="{{ matchBand }}" style="background:none;border:none;color:#8E8E8E;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:'Satoshi',sans-serif;"><span style="{{ matchDotStyle }}"></span>Match Band</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:11px;justify-items:center;">
+              <sc-for list="{{ headMetals }}" as="m" hint-placeholder-count="4">
+                <button onClick="{{ m.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;"><span style="{{ m.swatchStyle }}"></span><span style="{{ m.labelStyle }}">{{ m.label }}</span></button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ showSecondBand }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Metal · Second Band</span>
+              <button onClick="{{ matchBand2 }}" style="background:none;border:none;color:#8E8E8E;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:'Satoshi',sans-serif;"><span style="{{ matchDot2Style }}"></span>Match Band</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:11px;justify-items:center;">
+              <sc-for list="{{ band2Metals }}" as="m" hint-placeholder-count="4">
+                <button onClick="{{ m.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;"><span style="{{ m.swatchStyle }}"></span><span style="{{ m.labelStyle }}">{{ m.label }}</span></button>
+              </sc-for>
+            </div>
+            </sc-if>
+            <div style="display:flex;gap:12px;margin-top:12px;align-items:center;flex-wrap:wrap;">
+              <div style="display:flex;gap:5px;">
+                <sc-for list="{{ karatItems }}" as="it" hint-placeholder-count="2"><button onClick="{{ it.onClick }}" style="{{ it.pillStyle }}">{{ it.label }}</button></sc-for>
+              </div>
+              <div style="width:1px;height:16px;background:#E4E1D9;"></div>
+              <div style="display:flex;gap:8px;">
+                <sc-for list="{{ finishItems }}" as="it" hint-placeholder-count="3"><button onClick="{{ it.onClick }}" style="{{ it.textChipStyle }}">{{ it.label }}</button></sc-for>
+              </div>
+            </div>
+            <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:baseline;">
+              <span style="font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Ring Size</span>
+              <button style="background:none;border:none;color:#8E8E8E;font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:'Satoshi',sans-serif;">Size Guide</button>
+            </div>
+            <div style="display:flex;gap:5px;margin-top:9px;flex-wrap:wrap;">
+              <sc-for list="{{ sizeOptions }}" as="s" hint-placeholder-count="8"><button onClick="{{ s.onClick }}" style="{{ s.pillStyle }}">{{ s.label }}</button></sc-for>
+            </div>
+            <div style="margin-top:16px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Engraving</div>
+            <div style="position:relative;margin-top:9px;">
+              <input value="{{ config.engraving }}" onInput="{{ onEngrave }}" maxLength="20" placeholder="Engraving · Up To 20 Characters" style="width:100%;padding:10px 44px 10px 12px;border-radius:10px;background:#F4F2EC;border:1px solid #DDD9CF;color:#262626;font-size:12px;font-family:'Satoshi',sans-serif;outline:none;" />
+              <span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#9A958B;">{{ charCount }}/20</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:8px;">
+              <sc-for list="{{ fontChips }}" as="f" hint-placeholder-count="3">
+                <button onClick="{{ f.onClick }}" style="{{ f.style }}"><span style="{{ f.previewStyle }}">Abc</span><span style="font-size:11px;color:#9A958B;font-family:'Satoshi',sans-serif;letter-spacing:.04em;margin-top:2px;">{{ f.label }}</span></button>
+              </sc-for>
+            </div>
+            <button onClick="{{ nextStep }}" style="margin-top:20px;width:100%;padding:12px;border-radius:999px;background:#262626;border:none;color:#fff;font-size:12px;letter-spacing:.04em;cursor:pointer;font-family:'Satoshi',sans-serif;">Continue to Diamond →</button>
+          </div>
+          </sc-if>
+          <!-- STEP 2 -->
+          <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+          <div style="opacity:1;">
+            <div style="margin-top:13px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Diamond Shape</div>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:10px;justify-items:center;">
+              <sc-for list="{{ shapeItems }}" as="it" hint-placeholder-count="6">
+                <button onClick="{{ it.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;"><span style="{{ it.chipStyle }}">{{ it.iconEl }}</span><span style="{{ it.chipLabelStyle }}">{{ it.label }}</span></button>
+              </sc-for>
+            </div>
+            <div style="margin-top:14px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Carat</div>
+            <div style="display:flex;gap:5px;margin-top:9px;flex-wrap:wrap;">
+              <sc-for list="{{ caratItems }}" as="it" hint-placeholder-count="5"><button onClick="{{ it.onClick }}" style="{{ it.pillStyle }}">{{ it.label }}</button></sc-for>
+            </div>
+            <div style="margin-top:14px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Quality Tier</div>
+            <div style="display:flex;gap:5px;margin-top:9px;flex-wrap:wrap;">
+              <sc-for list="{{ qualityItems }}" as="it" hint-placeholder-count="3"><button onClick="{{ it.onClick }}" style="{{ it.pillStyle }}">{{ it.label }}</button></sc-for>
+            </div>
+            <div style="margin-top:14px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Centre Stone · Colour</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;justify-items:center;">
+              <sc-for list="{{ centreGemsSm }}" as="g" hint-placeholder-count="6">
+                <button onClick="{{ g.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;"><span style="{{ g.swatchStyle }}"></span><span style="{{ g.labelStyle }}">{{ g.label }}</span></button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ hasPaveNow }}" hint-placeholder-val="{{ true }}">
+              <div style="margin-top:14px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Accent Stones · Colour</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;justify-items:center;">
+                <sc-for list="{{ accentGemsSm }}" as="g" hint-placeholder-count="6">
+                  <button onClick="{{ g.onClick }}" style="background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;"><span style="{{ g.swatchStyle }}"></span><span style="{{ g.labelStyle }}">{{ g.label }}</span></button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Available · Lab-Grown</span>
+              <button onClick="{{ toggleCompare }}" style="{{ compareToggleStyle }}">Compare</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">
+              <sc-for list="{{ inventory }}" as="d" hint-placeholder-count="5">
+                <button onClick="{{ d.onClick }}" style="{{ d.style }}">
+                  <span style="display:flex;align-items:center;gap:9px;">
+                    <span style="display:flex;width:24px;height:24px;align-items:center;justify-content:center;color:#666;">{{ d.iconEl }}</span>
+                    <span style="display:flex;flex-direction:column;gap:1px;text-align:left;">
+                      <span style="font-size:12px;color:#262626;font-family:'Satoshi',sans-serif;">{{ d.caratLabel }}</span>
+                      <span style="font-size:11px;color:#9A958B;font-family:'Satoshi',sans-serif;">{{ d.sub }}</span>
+                    </span>
+                  </span>
+                  <span style="font-size:13px;color:#262626;font-family:'Satoshi',sans-serif;font-weight:600;">{{ d.priceLabel }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <button onClick="{{ nextStep }}" style="margin-top:16px;width:100%;padding:12px;border-radius:999px;background:#262626;border:none;color:#fff;font-size:12px;letter-spacing:.04em;cursor:pointer;font-family:'Satoshi',sans-serif;">Continue to Review →</button>
+          </div>
+          </sc-if>
+          <!-- STEP 3 -->
+          <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+          <div style="opacity:1;">
+            <div style="margin-top:13px;font-family:'Satoshi',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Your Configuration</div>
+            <div style="margin-top:10px;border-radius:12px;border:1px solid #E4E1D9;overflow:hidden;">
+              <sc-for list="{{ summary }}" as="r" hint-placeholder-count="8">
+                <div style="{{ r.rowStyle }}">
+                  <span style="font-size:12px;color:#9A958B;font-family:'Satoshi',sans-serif;">{{ r.label }}</span>
+                  <span style="display:flex;align-items:center;gap:7px;"><span style="font-size:12px;color:#262626;font-family:'Satoshi',sans-serif;">{{ r.value }}</span><button onClick="{{ r.onEdit }}" style="background:none;border:none;color:#9A958B;font-size:11px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:'Satoshi',sans-serif;">Edit</button></span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin-top:14px;display:flex;align-items:center;gap:11px;padding:11px;border-radius:12px;background:#FAF8F3;border:1px solid #E4E1D9;">
+              <div style="flex:1;">
+                <div style="font-family:'Satoshi',sans-serif;font-size:14px;font-weight:600;color:#262626;">Complete the Pair</div>
+                <div style="font-size:12px;color:#9A958B;font-family:'Satoshi',sans-serif;margin-top:1px;">Matching Wedding Band</div>
+              </div>
+              <button style="padding:7px 11px;border-radius:999px;background:#fff;border:1px solid #D8D4CA;color:#262626;font-size:12px;cursor:pointer;white-space:nowrap;font-family:'Satoshi',sans-serif;">Add ₹62,000</button>
+            </div>
+            <div style="margin-top:14px;display:flex;flex-direction:column;gap:7px;padding-top:14px;border-top:1px solid #EEEBE3;">
+              <sc-for list="{{ trustItems }}" as="t" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:#8E8E8E;font-family:'Satoshi',sans-serif;"><span style="color:{{ accent }};display:flex;">{{ t.iconEl }}</span>{{ t.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      <!-- STICKY CTA (inside frame) -->
+      <div style="position:absolute;bottom:0;left:0;right:0;z-index:30;background:#fff;border-top:1px solid #E4E1D9;padding:9px 14px 22px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="display:flex;flex-direction:column;">
+          <span style="font-family:'Satoshi',sans-serif;font-size:17px;font-weight:600;color:#262626;line-height:1.1;">{{ priceFormatted }}</span>
+          <sc-if value="{{ isRings }}" hint-placeholder-val="{{ true }}">
+          <button style="display:flex;align-items:center;gap:4px;background:none;border:none;color:#9A958B;font-size:10px;cursor:pointer;font-family:'Satoshi',sans-serif;padding:1px 0 0;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18M3 7l9-4 9 4M5 7v6a7 7 0 0 0 14 0V7"/></svg>Calculate Weight</button>
+          </sc-if>
+          <sc-if value="{{ isNonRing }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:10px;color:#9A958B;font-family:'Satoshi',sans-serif;">Incl. GST</span>
+          </sc-if>
+        </div>
+        <button style="padding:10px 22px;border-radius:999px;background:{{ accent }};border:none;color:#fff;font-size:12px;font-weight:500;cursor:pointer;font-family:'Satoshi',sans-serif;box-shadow:0 6px 18px rgba(159,11,16,.24);">Add to Bag</button>
+      </div>
+      <!-- chat fab (inside frame) -->
+      <sc-if value="{{ chatOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeChat }}" style="position:absolute;inset:0;z-index:48;background:rgba(20,18,16,.30);"></div>
+      <div style="position:absolute;left:12px;right:12px;bottom:122px;z-index:49;border-radius:18px;background:#fff;border:1px solid #E4E1D9;box-shadow:0 20px 56px rgba(0,0,0,.26);overflow:hidden;display:flex;flex-direction:column;max-height:380px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #EEEBE3;">
+          <div style="display:flex;align-items:center;gap:9px;"><span style="width:30px;height:30px;border-radius:50%;background:#262626;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;">✦</span><div><div style="font-size:13px;font-weight:500;color:#262626;font-family:'Satoshi',sans-serif;">Evol Stylist</div><div style="font-size:11px;color:#9A958B;font-family:'Satoshi',sans-serif;">AI Ring Designer</div></div></div>
+          <button onClick="{{ closeChat }}" style="width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #DDD9CF;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;padding:14px;overflow-y:auto;background:#FAF9F5;flex:1;">
+          <sc-for list="{{ chat }}" as="m" hint-placeholder-count="2">
+            <div style="{{ m.wrapStyle }}"><p style="{{ m.bubbleStyle }}">{{ m.text }}</p></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:7px;padding:10px 12px;border-top:1px solid #EEEBE3;">
+          <input ref="{{ chatRef }}" onKeyDown="{{ onChatKey }}" placeholder="Describe Your Dream Ring" style="flex:1;padding:10px 12px;border-radius:10px;background:#F4F2EC;border:1px solid #DDD9CF;color:#262626;font-size:13px;font-family:'Satoshi',sans-serif;outline:none;" />
+          <button onClick="{{ sendChat }}" style="width:38px;height:38px;border-radius:10px;background:#262626;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        </div>
+      </div>
+      </sc-if>
+      <button onClick="{{ toggleChat }}" style="position:absolute;bottom:72px;right:12px;width:40px;height:40px;border-radius:50%;background:#262626;border:none;color:#fff;font-size:15px;cursor:pointer;z-index:50;box-shadow:0 8px 22px rgba(0,0,0,.22);">✦</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= DESIGN SYSTEM ================= -->
+  <sc-if value="{{ isDS }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Design System" style="min-height:100vh;padding:96px 48px 64px;background:radial-gradient(circle at 50% 0%,#F4F1EA,#E5E3DC);">
+    <div style="max-width:1040px;margin:0 auto;">
+      <div style="font-family:'Satoshi',sans-serif;font-size:30px;font-weight:600;letter-spacing:.01em;color:#262626;">Evol Configurator · Design System</div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:36px;">
+        <!-- colors -->
+        <div style="border-radius:16px;background:#fff;border:1px solid #E4E1D9;box-shadow:0 6px 28px rgba(0,0,0,.05);padding:24px;">
+          <div style="font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Colour Tokens</div>
+          <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;">
+            <sc-for list="{{ dsColors }}" as="c" hint-placeholder-count="8">
+              <div style="display:flex;flex-direction:column;gap:6px;width:88px;"><span style="{{ c.swatch }}"></span><span style="font-size:14px;color:#262626;font-family:'Satoshi',sans-serif;">{{ c.name }}</span><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">{{ c.val }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <!-- type -->
+        <div style="border-radius:16px;background:#fff;border:1px solid #E4E1D9;box-shadow:0 6px 28px rgba(0,0,0,.05);padding:24px;">
+          <div style="font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Type Scale</div>
+          <div style="display:flex;flex-direction:column;gap:16px;margin-top:16px;">
+            <div><div style="font-family:'Satoshi',sans-serif;font-size:30px;font-weight:600;color:#262626;line-height:1;">Rings</div><div style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;margin-top:4px;">Satoshi 30 / 600 · Display &amp; Collection Headings</div></div>
+            <div><div style="font-family:'Satoshi',sans-serif;font-size:22px;font-weight:600;color:#262626;line-height:1;">₹2,45,000</div><div style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;margin-top:4px;">Satoshi 22 / 600 · Price &amp; Panel Titles</div></div>
+            <div><div style="font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;line-height:1;">Head Type</div><div style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;margin-top:4px;">Satoshi 13 / 600 · Section &amp; Option Labels (Caps)</div></div>
+            <div><div style="font-family:'Satoshi',sans-serif;font-size:14px;font-weight:500;color:#262626;">4-Prong · French Pavé · 18K</div><div style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;margin-top:4px;">Satoshi 14 / 500 · UI Controls &amp; Values</div></div>
+            <div><div style="font-family:'Satoshi',sans-serif;font-size:14px;color:#666;">IGI Certified, Made to Order, Ships in 15 Days.</div><div style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;margin-top:4px;">Satoshi 14 / 400 · Body &amp; Captions</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- components -->
+      <div style="border-radius:16px;background:#fff;border:1px solid #E4E1D9;box-shadow:0 6px 28px rgba(0,0,0,.05);padding:26px;margin-top:20px;">
+        <div style="font-family:'Satoshi',sans-serif;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8E8E8E;">Components</div>
+        <div style="display:flex;flex-wrap:wrap;gap:32px;margin-top:22px;align-items:flex-start;">
+          <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">Icon Card</span><div style="width:78px;height:64px;border-radius:12px;border:1.5px solid #262626;background:#FAF8F3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><div style="width:18px;height:18px;border:1px solid #262626;transform:rotate(45deg);"></div><span style="font-size:14px;color:#262626;font-family:'Satoshi',sans-serif;">Solitaire</span></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">Circular Chip</span><div style="display:flex;gap:8px;"><span style="width:40px;height:40px;border-radius:50%;border:1.5px solid #262626;background:#F3EFE7;display:flex;align-items:center;justify-content:center;color:#262626;"><span style="width:14px;height:14px;border:1px solid #262626;border-radius:50%;"></span></span><span style="width:40px;height:40px;border-radius:50%;border:1px solid #E0DCD2;background:#fff;display:flex;align-items:center;justify-content:center;color:#9A958B;"><span style="width:14px;height:14px;border:1px solid #9A958B;"></span></span></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">Metal Swatch</span><div style="display:flex;gap:8px;"><span style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f9d4c4,#e0a899 55%,#bd7e6c);box-shadow:0 0 0 2px #fff,0 0 0 4px #262626;"></span><span style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f9e9a0,#d4af37 55%,#a67c12);box-shadow:0 0 0 1px #D8D4CA;"></span><span style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#fbfbfb,#cdcdcd 55%,#9a9a9a);box-shadow:0 0 0 1px #D8D4CA;"></span></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">Pill Toggle</span><div style="display:flex;gap:6px;"><span style="padding:8px 14px;border-radius:999px;background:#262626;color:#fff;font-size:14px;font-family:'Satoshi',sans-serif;">1.00 ct</span><span style="padding:8px 14px;border-radius:999px;background:#fff;border:1px solid #D8D4CA;color:#666;font-size:14px;font-family:'Satoshi',sans-serif;">2.00 ct</span></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">Segmented Tabs</span><div style="display:flex;gap:4px;padding:5px;border-radius:13px;background:#F2EFE8;"><span style="padding:7px 14px;border-radius:9px;background:#262626;color:#fff;font-size:14px;font-family:'Satoshi',sans-serif;">Style</span><span style="padding:7px 14px;font-size:14px;color:#8E8E8E;font-family:'Satoshi',sans-serif;">Metal</span></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">CTA · Accent Only</span><span style="padding:14px 30px;border-radius:999px;background:#9F0B10;color:#fff;font-size:14px;font-weight:500;font-family:'Satoshi',sans-serif;box-shadow:0 8px 20px rgba(159,11,16,.24);">Add to Bag</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">Field</span><div style="width:170px;padding:12px 14px;border-radius:10px;background:#F4F2EC;border:1px solid #DDD9CF;font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">Enter Engraving…</div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">Slider w/ Stops</span><div style="width:170px;position:relative;height:18px;display:flex;align-items:center;"><div style="position:absolute;left:0;right:0;height:1px;background:#D8D4CA;"></div><div style="position:relative;display:flex;justify-content:space-between;width:100%;"><span style="width:8px;height:8px;border-radius:50%;background:#C9C5BB;"></span><span style="width:12px;height:12px;border-radius:50%;background:#262626;"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9C5BB;"></span><span style="width:8px;height:8px;border-radius:50%;background:#C9C5BB;"></span></div></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;"><span style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">Stylist Button</span><span style="width:48px;height:48px;border-radius:50%;background:#262626;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 8px 20px rgba(0,0,0,.18);">✦</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= EVOL STYLIST CHAT ================= -->
+  <sc-if value="{{ showWidget }}" hint-placeholder-val="{{ true }}">
+  <div style="position:fixed;bottom:96px;right:24px;z-index:300;display:flex;flex-direction:column;align-items:flex-end;">
+    <sc-if value="{{ chatOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="width:340px;margin-bottom:14px;border-radius:18px;background:#ffffff;border:1px solid #E4E1D9;box-shadow:0 20px 56px rgba(0,0,0,.16);overflow:hidden;animation:evolFade .25s ease;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #EEEBE3;">
+        <div style="display:flex;align-items:center;gap:11px;"><span style="width:36px;height:36px;border-radius:50%;background:#262626;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;">✦</span><div><div style="font-size:14px;font-weight:500;color:#262626;font-family:'Satoshi',sans-serif;">Evol Stylist</div><div style="font-size:14px;color:#9A958B;font-family:'Satoshi',sans-serif;">AI Ring Designer</div></div></div>
+        <div style="display:flex;gap:8px;">
+          <button title="Voice" style="width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid #DDD9CF;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></button>
+          <button onClick="{{ closeChat }}" style="width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid #DDD9CF;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;padding:16px;max-height:260px;overflow-y:auto;background:#FAF9F5;">
+        <sc-for list="{{ chat }}" as="m" hint-placeholder-count="2">
+          <div style="{{ m.wrapStyle }}"><p style="{{ m.bubbleStyle }}">{{ m.text }}</p></div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:8px;padding:12px 16px;border-top:1px solid #EEEBE3;">
+        <input ref="{{ chatRef }}" onKeyDown="{{ onChatKey }}" placeholder="Describe Your Dream Ring" style="flex:1;padding:11px 14px;border-radius:11px;background:#F4F2EC;border:1px solid #DDD9CF;color:#262626;font-size:14px;font-family:'Satoshi',sans-serif;outline:none;" />
+        <button onClick="{{ sendChat }}" style="width:40px;height:40px;border-radius:11px;background:#262626;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+      </div>
+    </div>
+    </sc-if>
+    <button onClick="{{ toggleChat }}" style="width:58px;height:58px;border-radius:50%;background:#262626;border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,.24);display:flex;align-items:center;justify-content:center;">✦</button>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;initialView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;desktop&quot;,&quot;mobile&quot;,&quot;ds&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#9F0B10&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {
+    view: this.props.initialView || 'desktop',
+    step: 1,
+    mobileTab: 'Style',
+    showBreakup: false,
+    chatOpen: false,
+    sizeOpen: false,
+    qualityExpanded: false,
+    compare: false,
+    wishlist: false,
+    collection: 'Rings',
+    ringLoading: true,
+    ringError: false,
+    camView: null,
+    mobileMenuOpen: false,
+    fsOpen: false,
+    updating: false,
+    chat: [
+      { role:'assistant', text:'Hi! I\u2019m your Evol Stylist \u2726 Try \u201cHidden Halo Oval in Rose Gold\u201d or \u201c2 Carat Emerald Cut\u201d.' }
+    ],
+    config: {
+      style:'Solitaire', head:'4-Prong', shank:'French Pav\u00e9', width:'2mm',
+      shape:'Round', carat:'1.00', quality:'EF / VVS',
+      bandMetal:'Rose Gold', headMetal:'White Gold', band2Metal:'White Gold', karat:'18K', finish:'High Polish',
+      size:'US 7', engraving:'', font:'Serif', diamondId:'d1', centreGemColor:'Colourless', accentGemColor:'Colourless', ringModel:'Classic Solitaire'
+    },
+    catSel: {
+      Earrings:{ style:'Stud', size:'4 mm', back:'Push Back', shape:'Round', carat:'0.50', quality:'EF / VVS', stoneType:'Lab Diamond', gemColor:'Colourless', layout:'Solitaire', accents:'Pearl Drops', bandMetal:'Yellow Gold', karat:'18K Gold', finish:'High Polish', pair:'Pair', engraving:'' },
+      Pendants:{ style:'Solitaire', bail:'Tapered', jumpRing:'Auto', shape:'Round', carat:'0.50', quality:'EF / VVS', stoneType:'Lab Diamond', gemColor:'Colourless', accents:'None', bandMetal:'Yellow Gold', karat:'18K Gold', finish:'High Polish', chain:'With Chain', chainType:'Cable', chainLen:'18\u2033', name:'', font:'Serif', engraving:'' },
+      Bracelets:{ style:'Tennis', length:'7\u2033', clasp:'Box Clasp', pattern:'Uniform', stonePerLink:'0.10 ct', shape:'Round', stoneType:'Lab Diamond', gemColor:'Colourless', quality:'EF / VVS', bandMetal:'White Gold', karat:'18K Gold', finish:'High Polish', charm:'Initial', charmCount:'3', engraving:'' },
+      Necklaces:{ style:'Pendant', chainType:'Cable', length:'18\u2033', layers:'1', pendantDesign:'Solitaire', shape:'Round', carat:'0.50', stationSize:'0.10 ct', stoneType:'Lab Diamond', gemColor:'Colourless', quality:'EF / VVS', bandMetal:'Yellow Gold', karat:'18K Gold', finish:'High Polish', engraving:'' }
+    }
+  };
+
+  chatRef = React.createRef();
+
+  ICON = (s) => React.createElement('span',{style:{display:'flex'},dangerouslySetInnerHTML:{__html:s}});
+
+  metalBase = {'Yellow Gold':40000,'White Gold':42000,'Rose Gold':45000,'Platinum':60000};
+  karatMult = {'14K':0.85,'18K':1};
+  widthMult = {'1.5mm':0.85,'2mm':1,'2.5mm':1.12,'3mm':1.25,'3.5mm':1.4,'4mm':1.55};
+  caratBase = {'0.50':70000,'0.75':120000,'1.00':180000,'1.50':320000,'2.00':520000};
+  qualityMult = {'EF / VVS':1,'GH / VS':0.82,'GH / SI':0.68};
+  shapeMult = {'Round':1,'Princess':0.92,'Emerald':0.95,'Oval':0.97,'Pear':0.94,'Cushion':0.96};
+  styleAdj = {'Solitaire':0,'Halo':25000,'Hidden Halo':22000,'Vintage':30000,'Cluster':28000,'Three Stone':45000};
+
+  metalGrad = {
+    'Yellow Gold':'linear-gradient(135deg,#f9e9a0,#d4af37 55%,#a67c12)',
+    'White Gold':'linear-gradient(135deg,#fbfbfb,#cdcdcd 55%,#9a9a9a)',
+    'Rose Gold':'linear-gradient(135deg,#f9d4c4,#e0a899 55%,#bd7e6c)',
+    'Platinum':'linear-gradient(135deg,#ffffff,#d9dee2 55%,#aab2b8)'
+  };
+
+  set(field,val){ this.setState(s=>({config:{...s.config,[field]:val}})); }
+  setCat(field,val){ const col=this.state.collection; this.setState(s=>({catSel:{...s.catSel,[col]:{...s.catSel[col],[field]:val}}})); }
+
+  // ---------- 3D RING VIEWER ----------
+  metalHex = {'Yellow Gold':0xd6b04a,'White Gold':0xd2d2d2,'Rose Gold':0xe0a48f,'Platinum':0xdadfe3};
+  gemHex = {'Colourless':0xc7d2df,'Champagne':0x7a4416,'Pink':0x9c1346,'Blue':0x12379e,'Green':0x0a5c38,'Yellow':0x9a6a06};
+  caratScale = {'0.50':0.72,'0.75':0.86,'1.00':1.00,'1.50':1.24,'2.00':1.48};
+
+  loadThreeLibs(){
+    if(this._libsP) return this._libsP;
+    const base='https://unpkg.com/three@0.128.0/';
+    const urls=[base+'build/three.min.js',base+'examples/js/controls/OrbitControls.js',base+'examples/js/loaders/GLTFLoader.js',base+'examples/js/loaders/DRACOLoader.js',base+'examples/js/environments/RoomEnvironment.js'];
+    const load=(src)=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+    this._libsP=(async()=>{ for(const u of urls){ await load(u); } })();
+    return this._libsP;
+  }
+
+  stageRef = (node)=>{
+    if(!node){ this.disposeViewer(); this._node=null; return; }
+    if(this._node===node) return;
+    this._node=node;
+    this.setState({ringLoading:true,ringError:false});
+    this.initThree(node);
+  };
+
+  async initThree(node){
+    try { await this.loadThreeLibs(); } catch(e){ this.setState({ringError:true,ringLoading:false}); return; }
+    if(this._node!==node || !window.THREE) return;
+    const THREE=window.THREE;
+    const w=node.clientWidth||600, h=node.clientHeight||600;
+    const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setSize(w,h);
+    renderer.outputEncoding=THREE.sRGBEncoding;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure=1.0;
+    renderer.domElement.style.cssText='width:100%;height:100%;display:block;cursor:grab;touch-action:none;';
+    renderer.domElement.addEventListener('pointerdown',()=>{renderer.domElement.style.cursor='grabbing';});
+    window.addEventListener('pointerup',()=>{if(renderer.domElement)renderer.domElement.style.cursor='grab';});
+    node.appendChild(renderer.domElement);
+
+    const scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(45,w/h,0.1,100);
+    camera.position.set(0.5,1.2,8.5);
+
+    const pmrem=new THREE.PMREMGenerator(renderer);
+    scene.environment=pmrem.fromScene(new THREE.RoomEnvironment(),0.04).texture;
+
+    const key=new THREE.DirectionalLight(0xffffff,2.1); key.position.set(5,9,7); scene.add(key);
+    const fill=new THREE.DirectionalLight(0xeef3ff,1.0); fill.position.set(-7,-1,5); scene.add(fill);
+    const rim=new THREE.DirectionalLight(0xffffff,1.3); rim.position.set(0,4,-8); scene.add(rim);
+    scene.add(new THREE.AmbientLight(0xffffff,0.45));
+
+    const controls=new THREE.OrbitControls(camera,renderer.domElement);
+    controls.enableDamping=true; controls.dampingFactor=0.08; controls.enablePan=false;
+    controls.autoRotate=true; controls.autoRotateSpeed=1.4;
+    controls.minDistance=5; controls.maxDistance=13;
+    controls.addEventListener('start',()=>{controls.autoRotate=false;});
+
+    this._three={renderer,scene,camera,controls,node,ro:null};
+
+    this._lastRingModel=this.state.config.ringModel;
+    this.loadRingInto(node);
+
+    const ro=new ResizeObserver(()=>{ if(!this._three)return; const nw=node.clientWidth,nh=node.clientHeight; if(nw&&nh){camera.aspect=nw/nh;camera.updateProjectionMatrix();renderer.setSize(nw,nh);} });
+    ro.observe(node); this._three.ro=ro;
+
+    const tick=()=>{ if(!this._three){return;} this._raf=requestAnimationFrame(tick); controls.update(); renderer.render(scene,camera); };
+    tick();
+    if(this.state.camView) this.applyCamView(this.state.camView);
+  }
+
+  // ---- camera presets (Front / Side / Top / Profile) ----
+  applyCamView(which){
+    const t=this._three; if(!t) return;
+    const d=8.5;
+    // distinct, always-upright angles (kept well clear of vertical → no gimbal flip / upside-down)
+    const pos={
+      Front:   [0,       0.7,   d],           // face-on, looking at the stone
+      Side:    [d,       0.6,   0.15],        // straight from the right
+      Top:     [0,       d*0.70, d*0.72],     // elevated front (~45°), upright
+      Profile: [d*0.72,  1.0,  -d*0.5]        // rear-right three-quarter, distinct from Side
+    }[which] || [0.5,1.2,d];
+    t.controls.autoRotate=false;
+    t.camera.up.set(0,1,0);
+    t.camera.position.set(pos[0],pos[1],pos[2]);
+    t.controls.target.set(0,0,0);
+    t.controls.update();
+    this.renderOnce();
+  }
+  setCamView=(which)=>{ this.setState({camView:which}); this.applyCamView(which); };
+  // CSS-based fullscreen for the 3D stage — reliable inside sandboxed iframes
+  toggleFullscreen=()=>{
+    this.setState(s=>({fsOpen:!s.fsOpen}));
+    // let layout settle, then resize the renderer to the new stage size
+    setTimeout(()=>{ const t=this._three; if(t){ const n=t.node; if(n&&n.clientWidth){ t.camera.aspect=n.clientWidth/n.clientHeight; t.camera.updateProjectionMatrix(); t.renderer.setSize(n.clientWidth,n.clientHeight); } this.renderOnce(); } }, 60);
+    setTimeout(()=>{ const t=this._three; if(t){ const n=t.node; if(n&&n.clientWidth){ t.camera.aspect=n.clientWidth/n.clientHeight; t.camera.updateProjectionMatrix(); t.renderer.setSize(n.clientWidth,n.clientHeight); } this.renderOnce(); } }, 320);
+  };
+
+  // which two-tone shanks expose an independent second band
+  isSplitShank(){ return ['Split','Bypass','Twisted'].includes(this.state.config.shank); }
+  // whether the current design carries pavé / side stones on the shank
+  hasPave(){
+    const c=this.state.config;
+    const paveShanks=['French Pav\u00e9','Channel','Split','Twisted'];
+    const sideStyles=['Halo','Hidden Halo','Vintage','Cluster','Three Stone'];
+    return paveShanks.includes(c.shank) || sideStyles.includes(c.style);
+  }
+  // per-model mesh → slot mapping (band / head / centre / accent)
+  slotFor(model,name){
+    const n=(name||'').toLowerCase();
+    if(model==='Cushion Halo'){
+      if(n==='alliance') return 'band';
+      if(n==='entourage') return 'head';
+      if(n==='object') return 'centre';
+      if(n.indexOf('cuchion')>=0||n.indexOf('cushion')>=0) return 'accent';
+      if(n.indexOf('dia')>=0) return 'accent';
+      return 'band';
+    }
+    if(n==='gold') return 'band';
+    if(n==='silver') return 'head';
+    if(n==='diamonds004') return 'centre';
+    if(n.indexOf('diamond')>=0) return 'accent';
+    return 'band';
+  }
+  styleStone(m){ m.metalness=0; m.roughness=0.32; if(m.clearcoat!==undefined){m.clearcoat=0.14;m.clearcoatRoughness=0.06;} m.envMapIntensity=0.6; m.flatShading=true; if(m.emissive){m.emissive.setHex(0x000000);m.emissiveIntensity=0;} m.needsUpdate=true; }
+
+  applyMetal(){
+    if(!window.THREE) return;
+    const c=this.state.config;
+    const isSol = c.ringModel==='Classic Solitaire';
+    const bc=this.metalHex[c.bandMetal] ?? 0xe0a48f;
+    // Classic Solitaire: the second metal mesh (silver setting/rail) is the SECOND BAND → band2Metal.
+    //   The "Metal · Head" control has no mesh on the solitaire — the ring is identical regardless of head colour.
+    // Cushion Halo: the head (entourage/halo setting) is a real metal → headMetal.
+    const hc=this.metalHex[ isSol ? c.band2Metal : c.headMetal ] ?? bc;
+    (this._bandMats||[]).forEach(m=>{ if(m.color){ m.color.setHex(bc); m.needsUpdate=true; } });
+    (this._headMats||[]).forEach(m=>{ if(m.color){ m.color.setHex(hc); m.needsUpdate=true; } });
+    this.renderOnce();
+  }
+  shankHasSecondBand(){ return this.state.config.ringModel==='Classic Solitaire' && ['Split','Twisted','Bypass'].includes(this.state.config.shank); }
+  // Gem slot 01 — centre stone
+  applyCentreColor(){
+    if(!window.THREE) return;
+    const hex=this.gemHex[this.state.config.centreGemColor] ?? 0xc7d2df;
+    (this._centreMats||[]).forEach(m=>{ if(m.color){ m.color.setHex(hex); if(m.emissive){m.emissive.setHex(0x000000);m.emissiveIntensity=0;} m.needsUpdate=true; } });
+    if(this._gemMesh){ this._gemMesh.material.color.setHex(hex); this._gemMesh.material.emissive.setHex(0x000000); this._gemMesh.material.emissiveIntensity=0; }
+    this.renderOnce();
+  }
+  // Gem slot 02 — side / pavé / halo accents
+  applyAccentColor(){
+    if(!window.THREE) return;
+    const hex=this.gemHex[this.state.config.accentGemColor] ?? 0xc7d2df;
+    (this._accentMats||[]).forEach(m=>{ if(m.color){ m.color.setHex(hex); if(m.emissive){m.emissive.setHex(0x000000);m.emissiveIntensity=0;} m.needsUpdate=true; } });
+    this.renderOnce();
+  }
+  // pavé/side stones appear only when the shank or style calls for them; a real halo stays
+  applyAccentsVisibility(){
+    const paveOn=this.hasPave();
+    (this._accentMeshes||[]).forEach(o=>{ const kind=(o.userData&&o.userData.accentKind)||'pave'; o.visible = kind==='halo' ? true : paveOn; });
+    this.renderOnce();
+  }
+
+  // ---- real 3D engraving: a curved canvas-texture ribbon hugging the band ----
+  buildEngraving(){
+    const THREE=window.THREE, t=this._three;
+    if(!THREE||!t) return;
+    try{
+      if(this._engraveMesh){ t.scene.remove(this._engraveMesh); try{this._engraveMesh.geometry.dispose();this._engraveMesh.material.map&&this._engraveMesh.material.map.dispose();this._engraveMesh.material.dispose();}catch(e){} this._engraveMesh=null; }
+      const c=this.state.config; const txt=(c.engraving||'').trim();
+      // engraving is not offered on the Classic Solitaire
+      if(c.ringModel==='Classic Solitaire'){ this.renderOnce(); return; }
+      if(!txt || !this._bandMeshes || !this._bandMeshes.length){ this.renderOnce(); return; }
+      const box=new THREE.Box3(); this._bandMeshes.forEach(m=>box.expandByObject(m));
+      const size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
+      const ext=[size.x,size.y,size.z];
+      let axis=0; if(ext[1]<ext[axis])axis=1; if(ext[2]<ext[axis])axis=2; // finger axis = thinnest
+      const A=new THREE.Vector3(axis===0?1:0,axis===1?1:0,axis===2?1:0);
+      let e1=new THREE.Vector3(0,1,0); if(Math.abs(A.y)>0.5)e1.set(1,0,0);
+      e1.crossVectors(A,e1).normalize();
+      const e2=new THREE.Vector3().crossVectors(A,e1).normalize();
+      const large=[0,1,2].filter(i=>i!==axis).map(i=>ext[i]/2);
+      const R=(large[0]+large[1])/2, bandW=ext[axis];
+      // up = toward centre stone; engrave on opposite (bottom) arc
+      const sc=this._stoneCenter ? this._stoneCenter.clone() : (this._centreMesh? new THREE.Box3().setFromObject(this._centreMesh).getCenter(new THREE.Vector3()) : center.clone().addScaledVector(e1,R));
+      const up=sc.clone().sub(center);
+      let phi=Math.atan2(up.dot(e2),up.dot(e1)); if(!isFinite(phi))phi=Math.PI/2;
+      const bottom=phi+Math.PI;
+      const arc=Math.min(3.0, Math.max(0.85, txt.length*0.24));
+      const Rsurf=R*1.006, segs=Math.max(48, txt.length*9);
+      const ribbonW=bandW*0.52;   // keep the lettering comfortably inside the band edges
+      const pos=[],uv=[],idx=[],nor=[];
+      for(let i=0;i<=segs;i++){
+        const u=i/segs, th=bottom - arc/2 + u*arc;
+        const rad=new THREE.Vector3().addScaledVector(e1,Math.cos(th)).addScaledVector(e2,Math.sin(th));
+        for(let j=0;j<=1;j++){
+          const w=(j-0.5)*ribbonW;
+          const p=center.clone().addScaledVector(rad,Rsurf).addScaledVector(A,w);
+          pos.push(p.x,p.y,p.z); nor.push(rad.x,rad.y,rad.z); uv.push(u,1-j);
+        }
+      }
+      for(let i=0;i<segs;i++){ const a=i*2,b=i*2+1,cc=i*2+2,d=i*2+3; idx.push(a,cc,b, b,cc,d); }
+      const g=new THREE.BufferGeometry();
+      g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+      g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+      g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+      g.setIndex(idx);
+      // canvas maps its FULL height onto the ribbon width, so cap the font by height too (prevents letters spilling past the band edges)
+      const arcLen=Rsurf*arc, H=256, W=Math.min(2048,Math.max(256,Math.round(H*arcLen/ribbonW)));
+      const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+      const x=cv.getContext('2d'); x.clearRect(0,0,W,H);
+      const fam={Serif:"'Cormorant', serif",Script:"'Pinyon Script', cursive",Block:"'Satoshi', sans-serif"};
+      const wgt=c.font==='Block'?'600':(c.font==='Serif'?'600':'400');
+      const maxH=H*0.46;                 // cap glyph height (leaves margin top & bottom)
+      let fs=Math.min(140, maxH); const setF=()=>{ x.font=`${wgt} ${fs}px ${fam[c.font]||fam.Serif}`; };
+      setF(); while(fs>18 && x.measureText(txt).width>W*0.82){ fs-=3; setF(); }
+      x.textAlign='center'; x.textBaseline='middle';
+      x.shadowColor='rgba(255,255,255,0.5)'; x.shadowBlur=3; x.shadowOffsetY=1;
+      x.fillStyle='rgba(28,24,20,0.95)';
+      x.fillText(txt, W/2, H/2);
+      const tex=new THREE.CanvasTexture(cv); tex.anisotropy=8; tex.needsUpdate=true;
+      const mat=new THREE.MeshBasicMaterial({map:tex,transparent:true,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4});
+      this._engraveMesh=new THREE.Mesh(g,mat);
+      t.scene.add(this._engraveMesh);
+      this.renderOnce();
+      if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>{ if(this._engraveMesh&&this._engraveMesh.material.map){ const cx=cv.getContext('2d'); cx.clearRect(0,0,W,H); fs=Math.min(140,maxH); setF(); while(fs>18 && cx.measureText(txt).width>W*0.82){ fs-=3; setF(); } cx.textAlign='center'; cx.textBaseline='middle'; cx.shadowColor='rgba(255,255,255,0.5)'; cx.shadowBlur=3; cx.shadowOffsetY=1; cx.fillStyle='rgba(28,24,20,0.95)'; cx.fillText(txt,W/2,H/2); this._engraveMesh.material.map.needsUpdate=true; this.renderOnce(); } }); }
+    }catch(e){ console.warn('engraving failed',e); }
+  }
+
+  renderOnce(){ const t=this._three; if(t&&t.renderer&&t.scene&&t.camera){ try{ t.renderer.render(t.scene,t.camera); }catch(e){} } }
+
+  ringFile(){ return this.state.config.ringModel==='Cushion Halo' ? 'assets/ring2_webgi.glb' : 'assets/ring_webgi.glb'; }
+
+  loadRingInto(node){
+    const THREE=window.THREE; if(!THREE) return;
+    const loader=new THREE.GLTFLoader();
+    const draco=new THREE.DRACOLoader(); draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/'); loader.setDRACOLoader(draco);
+    loader.load(this.ringFile(), (gltf)=>this.processRing(gltf,node), undefined, (err)=>{ console.warn('GLB load failed',err); this.setState({ringError:true,ringLoading:false}); });
+  }
+
+  processRing(gltf,node){
+    const THREE=window.THREE; const t=this._three;
+    if(this._node!==node || !t || !THREE) return;
+    const scene=t.scene, renderer=t.renderer, camera=t.camera;
+    const root=gltf.scene;
+    const box=new THREE.Box3().setFromObject(root);
+    const size=box.getSize(new THREE.Vector3());
+    const center=box.getCenter(new THREE.Vector3());
+    root.position.sub(center);
+    const maxDim=Math.max(size.x,size.y,size.z)||1;
+    this._baseScalar=4.4/maxDim;
+    root.scale.setScalar(this._baseScalar);
+    const model=this.state.config.ringModel;
+    this._bandMats=[]; this._headMats=[]; this._centreMats=[]; this._accentMats=[];
+    this._accentMeshes=[]; this._bandMeshes=[]; this._headMeshes=[]; this._centreMesh=null; this._goldBandMesh=null;
+    const cloneSlot=(mesh)=>{ const arr=Array.isArray(mesh.material)?mesh.material:[mesh.material]; const cl=arr.map(m=>{const xx=m.clone(); xx.name=m.name; return xx;}); mesh.material=Array.isArray(mesh.material)?cl:cl[0]; return cl; };
+    root.traverse(o=>{
+      if(!(o.isMesh && o.material)) return;
+      if((o.name||'').toLowerCase()==='ring-compare'){ o.visible=false; return; }
+      const slot=this.slotFor(model,o.name);
+      const cl=cloneSlot(o);
+      if(slot==='band'){ this._bandMats.push(...cl); this._bandMeshes.push(o); if(!this._goldBandMesh)this._goldBandMesh=o; cl.forEach(m=>{if(m.envMapIntensity!==undefined)m.envMapIntensity=1.3;}); }
+      else if(slot==='head'){ this._headMats.push(...cl); this._headMeshes.push(o); cl.forEach(m=>{if(m.envMapIntensity!==undefined)m.envMapIntensity=1.3;}); }
+      else if(slot==='centre'){ this._centreMats.push(...cl); this._centreMesh=o; cl.forEach(m=>this.styleStone(m)); }
+      else if(slot==='accent'){ this._accentMats.push(...cl); const nm=(o.name||'').toLowerCase(); o.userData.accentKind=(nm.indexOf('cuchion')>=0||nm.indexOf('cushion')>=0)?'halo':'pave'; this._accentMeshes.push(o); cl.forEach(m=>this.styleStone(m)); }
+      else { this._bandMats.push(...cl); this._bandMeshes.push(o); }
+    });
+    scene.add(root);
+    root.updateMatrixWorld(true);
+    // generic centre-stone capture — works for both models (diamonds004 / Object)
+    const cmesh=this._centreMesh;
+    if(cmesh){
+      const cb=new THREE.Box3().setFromObject(cmesh);
+      this._stoneCenter=cb.getCenter(new THREE.Vector3());
+      const sz=cb.getSize(new THREE.Vector3());
+      const bb=new THREE.Box3(); this._bandMeshes.forEach(m=>bb.expandByObject(m));
+      this._bandCenter=this._bandMeshes.length?bb.getCenter(new THREE.Vector3()):new THREE.Vector3();
+      let nrm=this._stoneCenter.clone().sub(this._bandCenter);
+      if(nrm.length()<1e-3) nrm.set(0,0,1);
+      this._stoneNormal=nrm.normalize();
+      this._stoneW=Math.max(sz.x,sz.y,sz.z);
+      this._stoneD=Math.max(0.05,Math.min(sz.x,sz.y,sz.z));
+      cmesh.visible=false; this._hasCenter=true;
+    } else { this._stoneCenter=null; this._hasCenter=false; this._stoneNormal=new THREE.Vector3(0,0,1); }
+    // base values captured at the 1.00 ct baseline (for proportional carat resizing of the HEAD only)
+    this._stoneCenterBase = this._stoneCenter ? this._stoneCenter.clone() : new THREE.Vector3();
+    this._baseRootPos = root.position.clone();
+    this._root=root;
+    // Carat pivot groups: head (setting + halo) scales about the centre stone; body (band + pavé)
+    // scales about the band centre. Both scale by the same carat factor so the 1.00 ct head:body ratio holds.
+    if(this._headGroup){ try{ t.scene.remove(this._headGroup); }catch(e){} this._headGroup=null; }
+    if(this._bodyGroup){ try{ t.scene.remove(this._bodyGroup); }catch(e){} this._bodyGroup=null; }
+    if(model==='Cushion Halo' && this._stoneCenter){
+      const halo=(this._accentMeshes||[]).filter(o=>(o.userData&&o.userData.accentKind)==='halo');
+      const pave=(this._accentMeshes||[]).filter(o=>(o.userData&&o.userData.accentKind)!=='halo');
+      const hg=new THREE.Group();
+      hg.position.copy(this._stoneCenter);   // pivot at the centre stone so head + halo + diamond stay aligned
+      scene.add(hg); hg.updateMatrixWorld(true);
+      [...this._headMeshes, ...halo].forEach(m=>{ try{ hg.attach(m); }catch(e){} });
+      this._headGroup=hg;
+      const bg=new THREE.Group();
+      bg.position.copy(this._stoneCenter);   // SAME pivot as the head → ring scales as one connected unit
+      scene.add(bg); bg.updateMatrixWorld(true);
+      [...this._bandMeshes, ...pave].forEach(m=>{ try{ bg.attach(m); }catch(e){} });
+      this._bodyGroup=bg;
+    }
+    this.applyCaratGeometry();
+    this.applyMetal();
+    this.rebuildGem();
+    this.applyCentreColor();
+    this.applyAccentColor();
+    this.applyAccentsVisibility();
+    this.buildEngraving();
+    this.setState({ringLoading:false});
+    try{ renderer.render(scene,camera); }catch(e){}
+  }
+
+  swapRingModel(){
+    const t=this._three; if(!t) return;
+    if(this._root){ t.scene.remove(this._root); }
+    if(this._headGroup){ try{ t.scene.remove(this._headGroup); }catch(e){} this._headGroup=null; }
+    if(this._bodyGroup){ try{ t.scene.remove(this._bodyGroup); }catch(e){} this._bodyGroup=null; }
+    if(this._gemMesh){ try{this._gemMesh.geometry.dispose();this._gemMesh.material.dispose();}catch(e){} t.scene.remove(this._gemMesh); this._gemMesh=null; }
+    if(this._engraveMesh){ try{t.scene.remove(this._engraveMesh);this._engraveMesh.geometry.dispose();this._engraveMesh.material.map&&this._engraveMesh.material.map.dispose();this._engraveMesh.material.dispose();}catch(e){} this._engraveMesh=null; }
+    this._bandMats=null; this._headMats=null; this._centreMats=null; this._accentMats=null; this._bandMeshes=null; this._headMeshes=null; this._goldBandMesh=null; this._centreMesh=null; this._accentMeshes=null; this._stoneCenter=null; this._hasCenter=false;
+    this._lastMetal=undefined; this._lastGem=undefined; this._lastCentreColor=undefined; this._lastAccentColor=undefined; this._lastStyle=undefined; this._lastEngrave=undefined;
+    this.setState({ringLoading:true});
+    this.loadRingInto(this._node);
+  }
+
+  gemOutline(shape){
+    const P=Math.PI, pts=[];
+    if(shape==='Princess'){ for(const a of [45,135,225,315]) pts.push([Math.cos(a*P/180),Math.sin(a*P/180)]); }
+    else if(shape==='Emerald'){ const ex=0.72,c=0.24; return [[-(ex-c),1],[(ex-c),1],[ex,1-c],[ex,-(1-c)],[(ex-c),-1],[-(ex-c),-1],[-ex,-(1-c)],[-ex,1-c]]; }
+    else if(shape==='Cushion'){ const N=16; for(let i=0;i<N;i++){const t=i/N*2*P;const cx=Math.cos(t),cy=Math.sin(t);pts.push([Math.sign(cx)*Math.pow(Math.abs(cx),0.5)*0.94,Math.sign(cy)*Math.pow(Math.abs(cy),0.5)*0.94]);} }
+    else if(shape==='Oval'){ const N=28; for(let i=0;i<N;i++){const t=i/N*2*P;pts.push([Math.cos(t)*0.72,Math.sin(t)]);} }
+    else if(shape==='Pear'){ const N=30; for(let i=0;i<N;i++){const t=i/N*2*P;pts.push([Math.sin(t)*Math.pow(Math.sin(t/2),1.4)*1.35,Math.cos(t)]);} }
+    else { const N=28; for(let i=0;i<N;i++){const t=i/N*2*P;pts.push([Math.cos(t),Math.sin(t)]);} }
+    return pts;
+  }
+
+  buildGemGeometry(shape){
+    const THREE=window.THREE;
+    const out=this.gemOutline(shape);
+    const n=out.length;
+    const step = (shape==='Emerald');
+    const tableRatio = step?0.78:0.62;
+    const crownH = step?0.30:0.42;
+    const pavH = 0.78;
+    const pos=[]; const idx=[];
+    for(let i=0;i<n;i++){ pos.push(out[i][0],out[i][1],0); }
+    for(let i=0;i<n;i++){ pos.push(out[i][0]*tableRatio,out[i][1]*tableRatio,crownH); }
+    pos.push(0,0,crownH); const tc=2*n;
+    pos.push(0,0,-pavH); const cu=2*n+1;
+    for(let i=0;i<n;i++){ const j=(i+1)%n;
+      idx.push(tc, n+i, n+j);
+      idx.push(n+i, n+j, j); idx.push(n+i, j, i);
+      idx.push(i, j, cu);
+    }
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+    g.setIndex(idx); g.computeVertexNormals();
+    return g;
+  }
+
+  // Cushion Halo: scale the head (setting + halo) and the body (band + pavé) by the carat factor so the
+  // 1.00 ct head:body ratio is preserved at every carat. 1.00 ct = baseline (factor 1).
+  caratGeomFactor(){
+    return this.state.config.ringModel==='Cushion Halo' ? (this.caratScale[this.state.config.carat] ?? 1) : 1;
+  }
+  // brief "updating" pulse shown on the stage whenever the ring geometry is re-rendered
+  pulseUpdating(){
+    this.setState({updating:true});
+    clearTimeout(this._updTimer);
+    this._updTimer=setTimeout(()=>this.setState({updating:false}), 700);
+  }
+
+  applyCaratGeometry(){
+    const THREE=window.THREE, t=this._three;
+    if(!THREE||!t) return;
+    const f=this.caratGeomFactor();
+    // Head and body scale by the SAME factor → the exact 1.00 ct head:body ratio is preserved at every
+    // carat (no overlap/gap). The size change is communicated to the user via the on-stage size gauge.
+    if(this._headGroup){ this._headGroup.scale.setScalar(f); this._headGroup.updateMatrixWorld(true); }
+    if(this._bodyGroup){ this._bodyGroup.scale.setScalar(f); this._bodyGroup.updateMatrixWorld(true); }
+    this.renderOnce();
+  }
+  // slightly enlarge a few procedural shapes that read small at the same carat
+  gemShapeBump(){
+    const c=this.state.config, m=c.ringModel, s=c.shape;
+    if(m==='Cushion Halo' && (s==='Princess'||s==='Oval'||s==='Pear')) return 1.12;
+    if(m==='Classic Solitaire' && s==='Princess') return 1.12;
+    return 1;
+  }
+
+  rebuildGem(){
+    const THREE=window.THREE; const t=this._three;
+    if(!THREE||!t||!this._stoneCenter) return;
+    const c=this.state.config;
+    const geo=this.buildGemGeometry(c.shape);
+    if(!this._gemMesh){
+      const hex=this.gemHex[c.centreGemColor]??0xf4f7ff;
+      const mat=new THREE.MeshPhysicalMaterial({color:hex,metalness:0,roughness:0.34,clearcoat:0.12,clearcoatRoughness:0.08,reflectivity:0.32,envMapIntensity:0.3,flatShading:true,side:THREE.DoubleSide,emissive:new THREE.Color(0x000000),emissiveIntensity:0});
+      this._gemMesh=new THREE.Mesh(geo,mat);
+      t.scene.add(this._gemMesh);
+    } else {
+      this._gemMesh.geometry.dispose();
+      this._gemMesh.geometry=geo;
+    }
+    // orient the table normal (+z of gem) along the stone's outward direction
+    const nrm=this._stoneNormal||new THREE.Vector3(0,0,1);
+    const q=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,1),nrm);
+    this._gemMesh.quaternion.copy(q);
+    // the centre stone sits at a fixed point; only its size tracks the carat (the head/halo scale to match)
+    this._gemMesh.position.copy(this._stoneCenter).addScaledVector(nrm,(this._stoneD||0.5)*0.16);
+    const k=this.caratScale[c.carat]??1;
+    const bump=this.gemShapeBump();
+    const xy=(this._stoneW*0.5)*k*1.02*bump;
+    const z=(this._stoneD/1.5)*k*1.4*bump;
+    this._gemMesh.scale.set(xy,xy,z);
+    this.applyCentreColor();
+    this.renderOnce();
+  }
+
+  disposeViewer(){
+    if(this._raf) cancelAnimationFrame(this._raf);
+    const t=this._three;
+    if(t){
+      try{t.ro&&t.ro.disconnect();}catch(e){}
+      try{t.controls.dispose();}catch(e){}
+      try{t.renderer.dispose();}catch(e){}
+      if(t.renderer.domElement&&t.renderer.domElement.parentNode) t.renderer.domElement.parentNode.removeChild(t.renderer.domElement);
+    }
+    if(this._gemMesh){ try{this._gemMesh.geometry.dispose();this._gemMesh.material.dispose();}catch(e){} }
+    if(this._engraveMesh){ try{this._engraveMesh.geometry.dispose();this._engraveMesh.material.map&&this._engraveMesh.material.map.dispose();this._engraveMesh.material.dispose();}catch(e){} }
+    this._three=null; this._root=null; this._gemMesh=null; this._engraveMesh=null;
+    this._bandMats=null; this._headMats=null; this._centreMats=null; this._accentMats=null; this._bandMeshes=null; this._centreMesh=null; this._accentMeshes=null; this._stoneCenter=null;
+    this._lastMetal=undefined; this._lastGem=undefined; this._lastCentreColor=undefined; this._lastAccentColor=undefined; this._lastStyle=undefined; this._lastEngrave=undefined;
+  }
+
+  componentDidUpdate(){
+    const c=this.state.config;
+    if(this._three && this._lastRingModel!==c.ringModel){ this._lastRingModel=c.ringModel; this.swapRingModel(); }
+    const metalSig=c.bandMetal+'|'+c.headMetal+'|'+c.band2Metal+'|'+c.shank;
+    if(this._lastMetal!==metalSig){ this._lastMetal=metalSig; this.applyMetal(); }
+    const gemSig=c.shape+'|'+c.carat;
+    if(this._lastGem!==gemSig){ this._lastGem=gemSig; this.pulseUpdating(); this.applyCaratGeometry(); this.rebuildGem(); this.buildEngraving(); }
+    if(this._lastCentreColor!==c.centreGemColor){ this._lastCentreColor=c.centreGemColor; this.applyCentreColor(); }
+    if(this._lastAccentColor!==c.accentGemColor){ this._lastAccentColor=c.accentGemColor; this.applyAccentColor(); }
+    const styleSig=c.style+'|'+c.shank;
+    if(this._lastStyle!==styleSig){ this._lastStyle=styleSig; this.applyAccentsVisibility(); }
+    const engSig=c.engraving+'|'+c.font;
+    if(this._lastEngrave!==engSig){ this._lastEngrave=engSig; this.buildEngraving(); }
+  }
+  componentWillUnmount(){ this.disposeViewer(); }
+
+  // ---- price ----
+  prices(){
+    const c = this.state.config;
+    const metal = Math.round(this.metalBase[c.bandMetal]*this.karatMult[c.karat]*this.widthMult[c.width]);
+    const diamond = Math.round(this.caratBase[c.carat]*this.qualityMult[c.quality]*this.shapeMult[c.shape]);
+    const making = 20000 + (this.styleAdj[c.style]||0);
+    return { metal, diamond, making, total: metal+diamond+making };
+  }
+  inr(n){ return '\u20b9'+n.toLocaleString('en-IN'); }
+
+  catIcon(col,sz){ sz=sz||20; const st="stroke='currentColor' stroke-width='1.3' fill='none' stroke-linecap='round' stroke-linejoin='round'";
+    const m={
+      'Rings':`<ellipse cx='12' cy='15' rx='6' ry='5' ${st}/><path d='M9 7l3 4 3-4-1.4-2.4h-3.2z' ${st}/>`,
+      'Earrings':`<circle cx='12' cy='5.5' r='1.7' ${st}/><path d='M12 7.2c-3 1-4.2 4-2.6 7 1.6 3 4.8 3 6.2 0 .9-2 .5-4-1.1-5.6' ${st}/>`,
+      'Pendants':`<path d='M7.5 4h9l-2.6 5.4H10z' ${st}/><circle cx='12' cy='15' r='4' ${st}/>`,
+      'Bracelets':`<ellipse cx='12' cy='12' rx='8.2' ry='6' ${st}/><rect x='10' y='4.4' width='4' height='3.2' rx='1' ${st}/>`,
+      'Necklaces':`<path d='M4 5c2.4 7.5 13.6 7.5 16 0' ${st}/><path d='M12 12.5l-2.2 4.2h4.4z' ${st}/>`
+    };
+    return `<svg width='${sz}' height='${sz}' viewBox='0 0 24 24'>${m[col]||m['Rings']}</svg>`;
+  }
+
+  catPrice(col,sel){
+    sel=sel||{};
+    const ck=((sel.carat||sel.stonePerLink||sel.stationSize||'0.50')+'').replace(' ct','');
+    const stone=(this.caratBase[ck]||(parseFloat(ck)||0.5)*210000)*(this.qualityMult[sel.quality]||0.9);
+    const tone={'Platinum':1.5,'White Gold':1.15,'Rose Gold':1.1,'Yellow Gold':1.0}[sel.bandMetal]||1;
+    const karatMul={'18K Gold':1,'14K Gold':0.85,'Platinum':1.5,'Sterling Silver':0.4}[sel.karat]||1;
+    const typeMul={'Lab Diamond':1,'Sapphire':0.8,'Ruby':1.1,'Emerald':1.05,'Aquamarine':0.7,'Amethyst':0.6,'Tourmaline':0.65}[sel.stoneType]||1;
+    let total;
+    if(col==='Earrings'){ const pair=sel.pair==='Pair'?2:1; total=22000*karatMul*tone + stone*typeMul*0.55*pair; }
+    else if(col==='Pendants'){ const chain=sel.chain==='With Chain'?9000:0; total=16000*karatMul*tone + stone*typeMul*0.75 + chain; }
+    else if(col==='Bracelets'){ const per=parseFloat(((sel.stonePerLink||'0.10')+'').replace(' ct',''))||0.1; total=30000*karatMul*tone + per*18*120000*(this.qualityMult[sel.quality]||0.9)*typeMul; }
+    else if(col==='Necklaces'){ const layers=parseInt(sel.layers||'1')||1; total=26000*karatMul*tone*layers + stone*typeMul*0.5; }
+    else total=stone;
+    return Math.round(total/100)*100;
+  }
+
+  // ---- icon svgs (currentColor for light theme) ----
+  styleSvg(id){
+    const st="stroke='currentColor' stroke-width='1.2' fill='none' stroke-linejoin='round'";
+    const band="<ellipse cx='12' cy='17' rx='6' ry='3.4' "+st+"/>";
+    const kite=(x,y,s)=>`<path d='M${x} ${y-2.6*s}L${x+1.9*s} ${y}L${x} ${y+2.6*s}L${x-1.9*s} ${y}Z' ${st}/>`;
+    const m={
+      'Solitaire':band+kite(12,7,1.7),
+      'Halo':band+`<circle cx='12' cy='7.5' r='4.4' ${st} stroke-dasharray='1.6 1.6'/>`+kite(12,7.5,1.2),
+      'Hidden Halo':band+kite(12,6.5,1.6)+`<circle cx='12' cy='11' r='3.6' ${st} stroke-dasharray='1.4 1.4'/>`,
+      'Vintage':band+kite(12,7,1.5)+`<circle cx='6.5' cy='15.5' r='.8' fill='currentColor'/><circle cx='17.5' cy='15.5' r='.8' fill='currentColor'/><circle cx='8.5' cy='12' r='.7' fill='currentColor'/><circle cx='15.5' cy='12' r='.7' fill='currentColor'/>`,
+      'Cluster':band+kite(12,7,1.2)+kite(8.5,9,1)+kite(15.5,9,1)+kite(10.2,5.4,.9)+kite(13.8,5.4,.9),
+      'Three Stone':band+kite(12,7,1.5)+kite(7,8.5,1.1)+kite(17,8.5,1.1)
+    };
+    return `<svg width='28' height='24' viewBox='0 0 24 24'>${m[id]}</svg>`;
+  }
+  headSvg(id){
+    const st="stroke='currentColor' stroke-width='1.2' fill='none' stroke-linecap='round'";
+    const m={
+      '4-Prong':`<circle cx='12' cy='12' r='5.5' ${st}/><path d='M6.5 6.5l2 2M17.5 6.5l-2 2M6.5 17.5l2-2M17.5 17.5l-2-2' ${st}/>`,
+      '6-Prong':`<circle cx='12' cy='12' r='5.5' ${st}/><path d='M12 5v2M12 17v2M6.5 8.5l1.7 1M15.8 14.5l1.7 1M6.5 15.5l1.7-1M15.8 9.5l1.7-1' ${st}/>`,
+      'Basket':`<circle cx='12' cy='10' r='5' ${st}/><path d='M8 13l1.5 5M16 13l-1.5 5M9 15.5h6M9.5 18h5' ${st}/>`,
+      'Bezel':`<circle cx='12' cy='12' r='7' ${st}/><circle cx='12' cy='12' r='4' ${st}/>`,
+      'Tulip':`<circle cx='12' cy='9' r='4.4' ${st}/><path d='M8 12c0 4 2 6.5 4 8.5 2-2 4-4.5 4-8.5M12 12v8' ${st}/>`,
+      'Halo Head (Classic)':`<circle cx='12' cy='12' r='3' ${st}/><circle cx='12' cy='12' r='6.6' ${st} stroke-dasharray='1.6 1.6'/>`,
+      'Halo Head (Floral)':`<circle cx='12' cy='12' r='2.6' ${st}/><circle cx='12' cy='5.4' r='1.6' ${st}/><circle cx='12' cy='18.6' r='1.6' ${st}/><circle cx='5.4' cy='12' r='1.6' ${st}/><circle cx='18.6' cy='12' r='1.6' ${st}/>`,
+      'Hidden Halo Head':`<circle cx='12' cy='9.5' r='4' ${st}/><circle cx='12' cy='15' r='6.2' ${st} stroke-dasharray='1.4 1.4'/>`
+    };
+    return `<svg width='26' height='24' viewBox='0 0 24 24'>${m[id]}</svg>`;
+  }
+  shankSvg(id){
+    const st="stroke='currentColor' stroke-width='1.2' fill='none' stroke-linecap='round'";
+    const m={
+      'Plain':`<path d='M4 9c4 4 12 4 16 0M4 15c4 4 12 4 16 0' ${st}/>`,
+      'French Pav\u00e9':`<path d='M4 9c4 4 12 4 16 0' ${st}/><path d='M4 15c4 4 12 4 16 0' ${st}/><circle cx='8' cy='11.6' r='.8' fill='currentColor'/><circle cx='12' cy='12.4' r='.8' fill='currentColor'/><circle cx='16' cy='11.6' r='.8' fill='currentColor'/>`,
+      'Cathedral':`<path d='M4 17c5 0 5-9 8-9s3 9 8 9' ${st}/><path d='M4 13c5 0 5-5 8-5s3 5 8 5' ${st}/>`,
+      'Knife Edge':`<path d='M4 15l8-7 8 7' ${st}/><path d='M4 18l8-7 8 7' ${st}/>`,
+      'Split':`<path d='M4 8c5 1 5 8 8 8s3-7 8-8' ${st}/><path d='M4 16c5-1 5-8 8-8' ${st}/>`,
+      'Twisted':`<path d='M4 9c6 6 10-6 16 0M4 15c6-6 10 6 16 0' ${st}/>`,
+      'Channel':`<path d='M5 9h14M5 15h14' ${st}/><path d='M9 9v6M13 9v6M17 9v6' ${st}/>`,
+      'Bypass':`<path d='M4 14c6 0 7-6 16-2' ${st}/><path d='M4 10c6 0 7 6 16 2' ${st}/>`
+    };
+    return `<svg width='26' height='24' viewBox='0 0 24 24'>${m[id]}</svg>`;
+  }
+  shapeSvg(id){
+    const st="stroke='currentColor' stroke-width='1.3' fill='none'";
+    const m={
+      'Round':`<circle cx='12' cy='12' r='8' ${st}/>`,
+      'Princess':`<rect x='4.5' y='4.5' width='15' height='15' ${st}/>`,
+      'Emerald':`<rect x='6.5' y='3.5' width='11' height='17' rx='1.4' ${st}/>`,
+      'Oval':`<ellipse cx='12' cy='12' rx='6' ry='9' ${st}/>`,
+      'Pear':`<path d='M12 3.5c3 4.5 5 6.5 5 10.5a5 5 0 0 1-10 0c0-4 2-6 5-10.5z' ${st}/>`,
+      'Cushion':`<rect x='4.5' y='4.5' width='15' height='15' rx='5' ${st}/>`
+    };
+    return `<svg width='20' height='20' viewBox='0 0 24 24'>${m[id]}</svg>`;
+  }
+
+  goStep(n){ this.setState({step:n}); }
+  nextStep = ()=>{ this.setState(s=>({step:Math.min(3,s.step+1)})); };
+
+  sendChat = ()=>{
+    const el=this.chatRef.current; if(!el) return;
+    const text=el.value.trim(); if(!text) return; el.value='';
+    const t=text.toLowerCase();
+    const changes=[]; const upd={};
+    const scan=(map,field,pretty)=>{ for(const k of Object.keys(map).sort((a,b)=>b.length-a.length)){ if(t.includes(k.toLowerCase())){ upd[field]=k; changes.push((pretty||field)+': '+k); break; } } };
+    scan(this.styleAdj,'style','Style');
+    scan(this.shapeMult,'shape','Shape');
+    scan(this.metalBase,'bandMetal','Metal');
+    if(upd.bandMetal){ upd.headMetal=upd.bandMetal; upd.band2Metal=upd.bandMetal; }
+    scan(this.gemHex,'centreGemColor','Centre Colour');
+    scan(this.caratBase,'carat','Carat');
+    const cm=t.match(/(\d(?:\.\d+)?)\s*(?:ct|carat)/); if(cm){ const v=parseFloat(cm[1]).toFixed(2); if(this.caratBase[v]){ upd.carat=v; changes.push('Carat: '+v); } }
+    const reply = changes.length ? 'Done \u2728 Applied - '+changes.join(' \u00b7 ')+'. Anything else?' : 'I couldn\u2019t map that to an option yet. Try a shape, metal, carat or style (e.g. \u201chalo princess platinum\u201d).';
+    this.setState(s=>({ config:{...s.config,...upd}, chat:[...s.chat,{role:'user',text},{role:'assistant',text:reply}] }));
+  };
+  onChatKey = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); this.sendChat(); } };
+
+  renderVals(){
+    const accent = this.props.accentColor || '#9F0B10';
+    const INK='#262626', MUTE='#9A958B';
+    const c = this.state.config;
+    const p = this.prices();
+    const view=this.state.view, step=this.state.step;
+    const collection=this.state.collection;
+    const isRings=collection==='Rings';
+
+    // collection tabs
+    const cats=['Rings','Earrings','Pendants','Bracelets','Necklaces'];
+    const collectionTabs=cats.map(id=>({label:id,iconEl:this.ICON(this.catIcon(id,15)),onClick:()=>this.setState({collection:id}),
+      iconColor: collection===id?'#fff':'#8E8E8E',
+      style:`display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;border:none;cursor:pointer;font-size:14px;font-family:'Satoshi',sans-serif;`+(collection===id?`background:#262626;color:#fff;`:`background:transparent;color:#666;`)}));
+    const collectionMenu=cats.map(id=>({label:id,iconEl:this.ICON(this.catIcon(id,18)),
+      iconColor: collection===id?'#262626':'#9A958B',
+      onClickMenu:()=>this.setState({collection:id,mobileMenuOpen:false}),
+      menuStyle:`display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;border:none;cursor:pointer;font-size:15px;font-family:'Satoshi',sans-serif;font-weight:500;text-align:left;width:100%;`+(collection===id?`background:#FAF8F3;color:#262626;`:`background:transparent;color:#5E5E5E;`)}));
+
+    // view tabs
+    const vtab=(id,label)=>({label,onClick:()=>this.setState({view:id}),
+      style:`padding:8px 14px;border-radius:9px;border:none;cursor:pointer;font-size:14px;letter-spacing:.02em;font-family:'Satoshi',sans-serif;`+(view===id?`background:#262626;color:#fff;`:`background:transparent;color:#8E8E8E;`)});
+    const viewTabs=[vtab('desktop','Desktop'),vtab('mobile','Mobile'),vtab('ds','Design System')];
+
+    // steps
+    const stepDefs=[['01','Choose Setting'],['02','Choose Diamond'],['03','Complete Ring']];
+    const steps=stepDefs.map((d,i)=>{ const n=i+1; const active=n===step, done=n<step;
+      const dotStyle = `display:flex;align-items:center;justify-content:center;flex-shrink:0;width:30px;height:30px;border-radius:50%;font-size:14px;line-height:1;font-family:'Satoshi',sans-serif;`+(active?`background:${accent};color:#fff;`:done?`background:#262626;color:#fff;`:`background:transparent;border:1px solid #C9C5BB;color:${MUTE};`);
+      return { dotLabel: done?'\u2713':d[0], label:d[1], onClick:()=>this.goStep(n),
+        dotStyle,
+        labelStyle:`font-size:14px;font-family:'Satoshi',sans-serif;`+(active?`color:${INK};`:`color:${MUTE};`),
+        connStyle: i<2?`display:block;width:46px;height:1px;margin:0 12px;background:${n<step?'#262626':'#DAD6CC'};`:`display:none;` };
+    });
+    const shortLbl=['Setting','Diamond','Complete'];
+    const mobileSteps=stepDefs.map((d,i)=>{ const n=i+1; const active=n===step,done=n<step;
+      return { dotLabel:done?'\u2713':d[0], label:shortLbl[i], onClick:()=>this.goStep(n), showLabel:active,
+        dotStyle:`display:flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;border:none;cursor:pointer;padding:0;font-size:10px;font-family:'Satoshi',sans-serif;`+(active?`background:${accent};color:#fff;`:done?`background:#262626;color:#fff;`:`background:#EFECE4;color:${MUTE};border:1px solid #DAD6CC;`),
+        labelStyle:`font-size:10px;font-family:'Satoshi',sans-serif;white-space:nowrap;`+(active?`color:${INK};`:`display:none;`),
+        connStyle:i<2?`display:block;width:14px;height:1px;margin:0 4px;background:${n<step?'#262626':'#DAD6CC'};`:`display:none;` }; });
+
+    // quick views (camera presets)
+    const qv=(label,sz)=>{ const active=this.state.camView===label; return {label,onClick:()=>this.setCamView(label),style:`padding:${sz==='sm'?'5px 10px':'6px 12px'};border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.04);font-size:${sz==='sm'?'11px':'14px'};cursor:pointer;font-family:'Satoshi',sans-serif;transition:all .2s;white-space:nowrap;`+(active?`background:#262626;border:1px solid #262626;color:#fff;`:`background:#fff;border:1px solid #E4E1D9;color:#666;`)}; };
+    const quickViews=['Front','Side','Top','Profile'].map(l=>qv(l));
+    const quickViewsM=['Front','Side','Top','Profile'].map(l=>qv(l,'sm'));
+
+    // option helpers
+    const cardStyle=(active)=>`display:flex;flex-direction:column;align-items:center;gap:6px;padding:11px 4px;border-radius:12px;cursor:pointer;transition:all .2s;`+(active?`background:#FAF8F3;border:1.5px solid #262626;`:`background:#fff;border:1px solid #E4E1D9;`);
+    const labelStyle=(active)=>`font-size:14px;font-family:'Satoshi',sans-serif;text-align:center;`+(active?`color:${INK};`:`color:${MUTE};`);
+    const rowCard=(active)=>`flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 12px;border-radius:12px;cursor:pointer;white-space:nowrap;`+(active?`background:#FAF8F3;border:1.5px solid #262626;`:`background:#fff;border:1px solid #E4E1D9;`);
+    const pill=(active)=>`padding:8px 14px;border-radius:999px;cursor:pointer;font-size:14px;font-family:'Satoshi',sans-serif;transition:all .2s;`+(active?`background:#262626;color:#fff;border:1px solid #262626;`:`background:#fff;color:#666;border:1px solid #D8D4CA;`);
+    const chip=(active)=>`width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:${active?INK:MUTE};`+(active?`background:#F3EFE7;border:1.5px solid #262626;`:`background:#fff;border:1px solid #E0DCD2;`);
+
+    const styleItems=Object.keys(this.styleAdj).map(id=>({label:id,iconEl:this.ICON(this.styleSvg(id)),iconColor:c.style===id?INK:MUTE,onClick:()=>this.set('style',id),cardStyle:cardStyle(c.style===id),labelStyle:labelStyle(c.style===id)}));
+    const heads=['4-Prong','6-Prong','Basket','Bezel','Tulip','Halo Head (Classic)','Halo Head (Floral)','Hidden Halo Head'];
+    const headItems=heads.map(id=>({label:id,iconEl:this.ICON(this.headSvg(id)),iconColor:c.head===id?INK:MUTE,onClick:()=>this.set('head',id),rowCardStyle:rowCard(c.head===id),rowLabelStyle:labelStyle(c.head===id)}));
+    const shanks=['Plain','French Pav\u00e9','Cathedral','Knife Edge','Split','Twisted','Channel','Bypass'];
+    const shankItems=shanks.map(id=>({label:id,iconEl:this.ICON(this.shankSvg(id)),iconColor:c.shank===id?INK:MUTE,onClick:()=>this.set('shank',id),rowCardStyle:rowCard(c.shank===id),rowLabelStyle:labelStyle(c.shank===id)}));
+
+    const widths=['1.5mm','2mm','2.5mm','3mm','3.5mm','4mm'];
+    const widthStops=widths.map(w=>{ const active=c.width===w; return {label:w,onClick:()=>this.set('width',w),
+      dotStyle:`display:block;border-radius:50%;transition:all .2s;`+(active?`width:13px;height:13px;background:#262626;box-shadow:0 0 0 3px rgba(38,38,38,.12);`:`width:8px;height:8px;background:#C9C5BB;`),
+      labelStyle:`font-size:14px;font-family:'Satoshi',sans-serif;width:24px;text-align:center;`+(active?`color:${INK};`:`color:#A8A39A;`)}; });
+
+    const shapes=['Round','Princess','Emerald','Oval','Pear','Cushion'];
+    const shapeItems=shapes.map(id=>({label:id,iconEl:this.ICON(this.shapeSvg(id)),onClick:()=>this.set('shape',id),chipStyle:chip(c.shape===id),chipLabelStyle:`font-size:14px;font-family:'Satoshi',sans-serif;`+(c.shape===id?`color:${INK};`:`color:${MUTE};`)}));
+
+    const gemSwatchBg={'Colourless':'#c7d2df','Champagne':'#7a4416','Pink':'#9c1346','Blue':'#12379e','Green':'#0a5c38','Yellow':'#9a6a06'};
+    const gemNames=['Colourless','Champagne','Pink','Blue','Green','Yellow'];
+    const mkGem=(field,sz)=>gemNames.map(id=>({label:id,onClick:()=>this.set(field,id),
+      swatchStyle:`width:${sz}px;height:${sz}px;border-radius:50%;background:${gemSwatchBg[id]};cursor:pointer;transition:all .2s;`+(c[field]===id?`box-shadow:0 0 0 2px #fff,0 0 0 4px #262626;`:`box-shadow:0 0 0 1px #D8D4CA;`),
+      labelStyle:`font-size:13px;font-family:'Satoshi',sans-serif;`+(c[field]===id?`color:${INK};`:`color:${MUTE};`)}));
+    const gemColors=mkGem('centreGemColor',34);
+    const centreGems=mkGem('centreGemColor',34), centreGemsSm=mkGem('centreGemColor',30);
+    const accentGems=mkGem('accentGemColor',34), accentGemsSm=mkGem('accentGemColor',30);
+    const hasPaveNow=this.hasPave();
+    const isSplitNow=this.isSplitShank();
+    const showSecondBand=this.shankHasSecondBand();
+
+    const carats=['0.50','0.75','1.00','1.50','2.00'];
+    const caratItems=carats.map(id=>({label:id+(id==='2.00'?' ct':''),onClick:()=>this.set('carat',id),pillStyle:pill(c.carat===id)}));
+
+    const ringModels=['Classic Solitaire','Cushion Halo'];
+    const ringModelItems=ringModels.map(id=>({label:id,onClick:()=>this.set('ringModel',id),pillStyle:pill(c.ringModel===id)}));
+
+    const qualities=['EF / VVS','GH / VS','GH / SI'];
+    const qualityItems=(this.state.qualityExpanded?qualities:[c.quality]).map(id=>({label:id,onClick:()=>this.set('quality',id),pillStyle:pill(c.quality===id)}));
+
+    const metalSwatch=(active,id)=>`width:34px;height:34px;border-radius:50%;background:${this.metalGrad[id]};cursor:pointer;transition:all .2s;`+(active?`box-shadow:0 0 0 2px #fff,0 0 0 4px #262626;`:`box-shadow:0 0 0 1px #D8D4CA;`);
+    const metals=['Yellow Gold','White Gold','Rose Gold','Platinum'];
+    const mlabel=(id)=>id.replace(' Gold','').replace('Platinum','Plat.');
+    const bandMetals=metals.map(id=>({label:mlabel(id),onClick:()=>this.set('bandMetal',id),swatchStyle:metalSwatch(c.bandMetal===id,id),labelStyle:`font-size:14px;font-family:'Satoshi',sans-serif;`+(c.bandMetal===id?`color:${INK};`:`color:${MUTE};`)}));
+    const headMetals=metals.map(id=>({label:mlabel(id),onClick:()=>this.set('headMetal',id),swatchStyle:metalSwatch(c.headMetal===id,id),labelStyle:`font-size:14px;font-family:'Satoshi',sans-serif;`+(c.headMetal===id?`color:${INK};`:`color:${MUTE};`)}));
+    const band2Metals=metals.map(id=>({label:mlabel(id),onClick:()=>this.set('band2Metal',id),swatchStyle:metalSwatch(c.band2Metal===id,id),labelStyle:`font-size:14px;font-family:'Satoshi',sans-serif;`+(c.band2Metal===id?`color:${INK};`:`color:${MUTE};`)}));
+
+    const karatItems=['14K','18K'].map(id=>({label:id,onClick:()=>this.set('karat',id),pillStyle:pill(c.karat===id)}));
+    const textChip=(active)=>`background:none;border:none;cursor:pointer;font-size:14px;font-family:'Satoshi',sans-serif;`+(active?`color:${INK};text-decoration:underline;text-underline-offset:3px;`:`color:${MUTE};`);
+    const finishItems=['High Polish','Matte','Brushed'].map(id=>({label:id,onClick:()=>this.set('finish',id),textChipStyle:textChip(c.finish===id)}));
+
+    const sizes=['US 4','US 4.5','US 5','US 5.5','US 6','US 6.5','US 7','US 7.5','US 8','US 8.5','US 9','US 9.5','US 10'];
+    const sizeOptions=sizes.map(id=>({label:id,onClick:()=>this.setState(s=>({config:{...s.config,size:id},sizeOpen:false})),
+      style:`display:block;width:100%;text-align:left;padding:9px 12px;border-radius:7px;background:`+(c.size===id?'#F3EFE7':'transparent')+`;border:none;color:`+(c.size===id?INK:'#666')+`;font-size:14px;cursor:pointer;font-family:'Satoshi',sans-serif;`,
+      pillStyle:pill(c.size===id)}));
+
+    const fonts=[['Serif',"'Cormorant',serif"],['Script',"'Pinyon Script',cursive"],['Block',"'Satoshi',sans-serif"]];
+    const fontChips=fonts.map(f=>({label:f[0],onClick:()=>this.set('font',f[0]),
+      style:`flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 4px;border-radius:10px;cursor:pointer;background:#fff;`+(c.font===f[0]?`border:1.5px solid #262626;`:`border:1px solid #E4E1D9;`),
+      previewStyle:`font-family:${f[1]};font-size:20px;color:${INK};`+(f[0]==='Block'?'font-weight:600;text-transform:uppercase;':'')}));
+
+    // inventory step 2
+    const inv=[
+      {id:'d1',carat:'1.00',quality:'EF / VVS'},
+      {id:'d2',carat:'1.00',quality:'GH / VS'},
+      {id:'d3',carat:'1.50',quality:'EF / VVS'},
+      {id:'d4',carat:'0.75',quality:'EF / VVS'},
+      {id:'d5',carat:'2.00',quality:'GH / VS'},
+      {id:'d6',carat:'1.00',quality:'GH / SI'}
+    ];
+    const inventory=inv.map(d=>{ const price=Math.round(this.caratBase[d.carat]*this.qualityMult[d.quality]*this.shapeMult[c.shape]); const active=c.diamondId===d.id;
+      return { caratLabel:d.carat+' ct '+c.shape, sub:d.quality+' \u00b7 IGI \u00b7 Lab-Grown', priceLabel:this.inr(price), iconEl:this.ICON(this.shapeSvg(c.shape)),
+        onClick:()=>this.setState(s=>({config:{...s.config,diamondId:d.id,carat:d.carat,quality:d.quality}})),
+        style:`display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;cursor:pointer;text-align:left;`+(active?`background:#FAF8F3;border:1.5px solid #262626;`:`background:#fff;border:1px solid #E4E1D9;`) }; });
+
+    // summary step 3
+    const sm=(label,value,gotoStep)=>({label,value,onEdit:()=>this.goStep(gotoStep),rowStyle:`display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #EEEBE3;`});
+    const summary=[
+      sm('Ring Style',c.style,1), sm('Head Type',c.head,1), sm('Shank',c.shank,1),
+      sm('Shank Width',c.width,1), sm('Diamond',c.carat+' ct '+c.shape,2), sm('Quality',c.quality,2),
+      sm('Centre Colour',c.centreGemColor,2),
+    ];
+    if(hasPaveNow) summary.push(sm('Accent Colour',c.accentGemColor,1));
+    {
+      summary.push(sm('Metal · Band',c.bandMetal+' \u00b7 '+c.karat,1));
+      summary.push(sm('Metal · Head',c.headMetal,1));
+      if(showSecondBand) summary.push(sm('Metal · Second Band',c.band2Metal,1));
+      summary.push(sm('Ring Size',c.size,1));
+      summary.push(sm('Engraving',c.engraving?('\u201c'+c.engraving+'\u201d \u00b7 '+c.font):'None',1));
+    }
+
+    // trust
+    const tIcon=(s)=>this.ICON(`<svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.7'>${s}</svg>`);
+    const check="<path d='M20 6L9 17l-5-5'/>"; const ship="<rect x='1' y='6' width='13' height='10' rx='1'/><path d='M14 9h4l3 3v4h-7'/><circle cx='6' cy='18' r='1.6'/><circle cx='17' cy='18' r='1.6'/>"; const cert="<circle cx='12' cy='9' r='6'/><path d='M9 14l-1 7 4-2 4 2-1-7'/>"; const warr="<path d='M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z'/>";
+    const trustItems=[
+      {label:'Made to Order \u00b7 Ships in 15 Days',iconEl:tIcon(ship)},
+      {label:'IGI Certified Diamonds',iconEl:tIcon(cert)},
+      {label:'Free Shipping & Returns',iconEl:tIcon(check)},
+      {label:'Lifetime Warranty',iconEl:tIcon(warr)}
+    ];
+    const trustInline=[
+      {label:'Ships in 15 Days',iconEl:tIcon(ship)},
+      {label:'IGI Certified',iconEl:tIcon(cert)},
+      {label:'Free Shipping & Returns',iconEl:tIcon(check)},
+      {label:'Lifetime Warranty',iconEl:tIcon(warr)}
+    ];
+
+    // mobile tabs
+    const mtabs=['Style','Head','Shank','Stone','Metal','Size'];
+    const mobileTabs=mtabs.map(id=>({label:id,onClick:()=>this.setState({mobileTab:id}),
+      style:`flex:0 0 auto;padding:8px 16px;border-radius:999px;cursor:pointer;font-size:14px;font-family:'Satoshi',sans-serif;border:none;`+(this.state.mobileTab===id?`background:#262626;color:#fff;`:`background:#F2EFE8;color:#8E8E8E;`)}));
+
+    // chat
+    const chat=this.state.chat.map(m=>({text:m.text,
+      wrapStyle:`max-width:86%;align-self:${m.role==='user'?'flex-end':'flex-start'};`,
+      bubbleStyle:`margin:0;font-size:14px;line-height:1.5;font-family:'Satoshi',sans-serif;padding:10px 13px;`+(m.role==='user'?`background:#262626;color:#fff;border-radius:14px 14px 4px 14px;`:`background:#F0EDE5;color:#3A3A3A;border-radius:14px 14px 14px 4px;`)}));
+
+    // ---- non-ring category configurators ----
+    const caratsCat=['0.25','0.50','0.75','1.00','1.50','2.00','3.00'];
+    const stoneTypes=['Lab Diamond','Sapphire','Ruby','Emerald','Aquamarine','Amethyst','Tourmaline'];
+    const stoneTypeBg={'Lab Diamond':'radial-gradient(circle at 35% 30%,#ffffff,#dfe7f5)','Sapphire':'radial-gradient(circle at 35% 30%,#9cc4f5,#1c4fa6)','Ruby':'radial-gradient(circle at 35% 30%,#f3a0ad,#b11030)','Emerald':'radial-gradient(circle at 35% 30%,#9fe6bf,#1f8f5a)','Aquamarine':'radial-gradient(circle at 35% 30%,#bff0f5,#46b6c8)','Amethyst':'radial-gradient(circle at 35% 30%,#d7b8f0,#7b3fb0)','Tourmaline':'radial-gradient(circle at 35% 30%,#f4b8d4,#c64f86)'};
+    const cardText=(active)=>`display:flex;align-items:center;justify-content:center;text-align:center;padding:13px 8px;border-radius:12px;cursor:pointer;font-size:14px;font-family:'Satoshi',sans-serif;min-height:46px;line-height:1.2;`+(active?`background:#FAF8F3;border:1.5px solid #262626;color:${INK};`:`background:#fff;border:1px solid #E4E1D9;color:#666;`);
+    const csel=this.state.catSel[collection]||{};
+    const base6={isCardText:false,isChips:false,isPills:false,isSwatches:false,isStoneSwatches:false,isText:false};
+    const gPills=(label,field,opts)=>({label,...base6,isPills:true,items:opts.map(o=>({label:o,onClick:()=>this.setCat(field,o),pillStyle:pill(csel[field]===o)}))});
+    const gCards=(label,field,opts)=>({label,...base6,isCardText:true,items:opts.map(o=>({label:o,onClick:()=>this.setCat(field,o),cardStyle:cardText(csel[field]===o)}))});
+    const gChips=(label,field,opts)=>({label,...base6,isChips:true,items:opts.map(o=>({label:o,iconEl:this.ICON(this.shapeSvg(o)),onClick:()=>this.setCat(field,o),chipStyle:chip(csel[field]===o),chipLabelStyle:`font-size:14px;font-family:'Satoshi',sans-serif;`+(csel[field]===o?`color:${INK};`:`color:${MUTE};`)}))});
+    const gMetal=(label,field)=>({label,...base6,isSwatches:true,items:metals.map(id=>({label:mlabel(id),onClick:()=>this.setCat(field,id),swatchStyle:metalSwatch(csel[field]===id,id),labelStyle:`font-size:14px;font-family:'Satoshi',sans-serif;`+(csel[field]===id?`color:${INK};`:`color:${MUTE};`)}))});
+    const gStone=(label,field)=>({label,...base6,isStoneSwatches:true,items:stoneTypes.map(id=>({label:id,onClick:()=>this.setCat(field,id),swatchStyle:`width:34px;height:34px;border-radius:50%;background:${stoneTypeBg[id]};cursor:pointer;transition:all .2s;`+(csel[field]===id?`box-shadow:0 0 0 2px #fff,0 0 0 4px #262626;`:`box-shadow:0 0 0 1px #D8D4CA;`),labelStyle:`font-size:14px;font-family:'Satoshi',sans-serif;`+(csel[field]===id?`color:${INK};`:`color:${MUTE};`)}))});
+    const gText=(label,field,ph)=>({label,...base6,isText:true,items:[],textValue:csel[field]||'',onText:(e)=>this.setCat(field,e.target.value),placeholder:ph});
+    const gColor=(label,field)=>({label,...base6,isSwatches:true,items:gemNames.map(id=>({label:id,onClick:()=>this.setCat(field,id),swatchStyle:`width:34px;height:34px;border-radius:50%;background:${gemSwatchBg[id]};cursor:pointer;transition:all .2s;`+(csel[field]===id?`box-shadow:0 0 0 2px #fff,0 0 0 4px #262626;`:`box-shadow:0 0 0 1px #D8D4CA;`),labelStyle:`font-size:13px;font-family:'Satoshi',sans-serif;`+(csel[field]===id?`color:${INK};`:`color:${MUTE};`)}))});
+    const karatOpts=['14K Gold','18K Gold','Platinum','Sterling Silver'];
+    const finishOpts=['High Polish','Matte','Brushed'];
+    const stoneColourLabel=(csel.stoneType||'Lab Diamond')==='Lab Diamond'?'Diamond Colour':'Stone Colour';
+    let catGroups=[];
+    if(collection==='Earrings'){
+      const st=csel.style||'Stud';
+      catGroups=[ gCards('Earring Style','style',['Stud','Hoop','Drop','Dangle','Chandbali']) ];
+      if(st==='Stud') catGroups.push(gPills('Stud Size','size',['3 mm','4 mm','5 mm','6 mm','7 mm','8 mm']));
+      else if(st==='Hoop') catGroups.push(gPills('Hoop Diameter','size',['10 mm','15 mm','20 mm','25 mm','30 mm','40 mm']));
+      else catGroups.push(gPills('Drop Length','size',['15 mm','20 mm','30 mm','40 mm','50 mm','60 mm']));
+      catGroups.push(gPills('Back Type','back', st==='Hoop'?['Hinged Snap','Latch Back','French Lock']:['Push Back','Screw Back','Lever Back','Fish Hook']));
+      catGroups.push(gChips('Stone Shape','shape',shapes));
+      catGroups.push(gPills(st==='Hoop'?'Carat / Hoop':'Carat (Each)','carat',caratsCat));
+      catGroups.push(gStone('Stone Type','stoneType'));
+      catGroups.push(gColor(stoneColourLabel,'gemColor'));
+      catGroups.push(gPills('Quality Tier','quality',qualities));
+      if(st==='Stud') catGroups.push(gPills('Setting','layout',['Solitaire','Halo','Three-Prong Martini','Bezel']));
+      else if(st==='Hoop') catGroups.push(gPills('Pav\u00e9 Coverage','layout',['Inside Only','Half Eternity','Full Eternity']));
+      else { catGroups.push(gPills('Drop Design','layout',['Solitaire Drop','Halo Drop','Cluster','Pearl Drop','Graduated'])); catGroups.push(gPills('Accents','accents',['None','Diamond Studded Top','Pearl Drops','Coloured Stones'])); }
+      catGroups.push(gMetal('Metal \u00b7 Tone','bandMetal'));
+      catGroups.push(gPills('Metal \u00b7 Karat','karat',karatOpts));
+      catGroups.push(gPills('Finish','finish',finishOpts));
+      catGroups.push(gPills('Pairing','pair',['Pair','Single']));
+      catGroups.push(gText('Engraving','engraving','Where Applicable \u00b7 Up To 20 Characters'));
+    }
+    else if(collection==='Pendants'){
+      const st=csel.style||'Solitaire';
+      const isText=st==='Initial / Name';
+      catGroups=[ gCards('Pendant Style','style',['Solitaire','Halo','Initial / Name','Circle','Clover','Heart','Evil Eye','Coin Frame']) ];
+      if(isText){
+        catGroups.push(gText(((csel.name||'').length>2?'Name':'Name / Initial'),'name','Enter Name Or Initial'));
+        catGroups.push(gPills('Nameplate Font','font',['Serif','Script','Block']));
+        catGroups.push(gPills('Accent Stones','accents',['None','Stone On Letter','Pav\u00e9 Letters','Halo Frame']));
+      } else {
+        catGroups.push(gChips('Centre Shape','shape',shapes));
+        catGroups.push(gPills('Carat','carat',caratsCat));
+        catGroups.push(gStone('Stone Type','stoneType'));
+        catGroups.push(gColor(stoneColourLabel,'gemColor'));
+        catGroups.push(gPills('Quality Tier','quality',qualities));
+        catGroups.push(gPills('Accent Stones','accents',['None','Halo','Pav\u00e9 Fill','Bezel Accents']));
+      }
+      catGroups.push(gPills('Bail Type','bail',['Rectangular','Tapered','Wire','Hidden']));
+      catGroups.push(gMetal('Metal \u00b7 Tone','bandMetal'));
+      catGroups.push(gPills('Metal \u00b7 Karat','karat',karatOpts));
+      catGroups.push(gPills('Finish','finish',finishOpts));
+      catGroups.push(gPills('Chain','chain',['Pendant Only','With Chain']));
+      if((csel.chain||'With Chain')==='With Chain'){
+        catGroups.push(gPills('Chain Type','chainType',['Cable','Box','Rope','Snake']));
+        catGroups.push(gPills('Chain Length','chainLen',['16\u2033','18\u2033','20\u2033','22\u2033']));
+      }
+      catGroups.push(gText('Engraving (Reverse)','engraving','Up To 20 Characters'));
+    }
+    else if(collection==='Bracelets'){
+      const st=csel.style||'Tennis';
+      catGroups=[ gCards('Bracelet Style','style',['Tennis','Charm','Cuff','Chain']) ];
+      if(st==='Cuff') catGroups.push(gPills('Cuff Size','length',['Small','Medium','Large']));
+      else catGroups.push(gPills('Length','length',['6\u2033','6.5\u2033','7\u2033','7.5\u2033','8\u2033','8.5\u2033']));
+      catGroups.push(gPills('Clasp Type','clasp', st==='Cuff'?['Open Cuff','Hinged Cuff']:['Box Clasp','Lobster','Toggle','Hidden Clasp']));
+      if(st==='Tennis'){
+        catGroups.push(gPills('Stone Pattern','pattern',['Uniform','Graduated','Alternating Shape']));
+        catGroups.push(gPills('Stone / Link','stonePerLink',['0.10 ct','0.15 ct','0.20 ct','0.30 ct','0.50 ct']));
+        catGroups.push(gChips('Stone Shape','shape',shapes));
+        catGroups.push(gStone('Stone Type','stoneType'));
+        catGroups.push(gColor(stoneColourLabel,'gemColor'));
+        catGroups.push(gPills('Quality Tier','quality',qualities));
+      } else if(st==='Charm'){
+        catGroups.push(gPills('Charms','charm',['Initial','Symbol','Birthstone','Mixed']));
+        catGroups.push(gPills('Charm Count','charmCount',['1','2','3','5']));
+        catGroups.push(gStone('Charm Stone','stoneType'));
+        catGroups.push(gColor(stoneColourLabel,'gemColor'));
+      } else if(st==='Cuff'){
+        catGroups.push(gPills('Surface','pattern',['Plain','Pav\u00e9 Line','Full Pav\u00e9','Bezel Stones']));
+        catGroups.push(gStone('Stone Type','stoneType'));
+        catGroups.push(gColor(stoneColourLabel,'gemColor'));
+      } else {
+        catGroups.push(gPills('Stone Stations','pattern',['None','Few','Evenly Spaced','Dense']));
+        catGroups.push(gStone('Stone Type','stoneType'));
+      }
+      catGroups.push(gMetal('Metal \u00b7 Tone','bandMetal'));
+      catGroups.push(gPills('Metal \u00b7 Karat','karat',karatOpts));
+      catGroups.push(gPills('Finish','finish',finishOpts));
+      catGroups.push(gText('Engraving','engraving', st==='Cuff'?'Cuff Face Or Clasp Tag':'Clasp Tag \u00b7 Up To 20 Characters'));
+    }
+    else if(collection==='Necklaces'){
+      const st=csel.style||'Pendant';
+      catGroups=[ gCards('Necklace Style','style',['Plain Chain','Pendant','Station','Choker','Rivi\u00e8re']) ];
+      catGroups.push(gPills('Chain Type','chainType',['Cable','Box','Rope','Snake','Paperclip']));
+      catGroups.push(gPills('Length','length',['14\u2033','16\u2033','18\u2033','20\u2033','24\u2033']));
+      catGroups.push(gPills('Layers','layers',['1','2','3']));
+      if(st==='Pendant'){
+        catGroups.push(gPills('Pendant Design','pendantDesign',['Solitaire','Halo','Initial / Name','Heart','Cluster']));
+        if((csel.pendantDesign||'Solitaire')==='Initial / Name'){
+          catGroups.push(gText('Name / Initial','name','Enter Name Or Initial'));
+        } else {
+          catGroups.push(gChips('Centre Shape','shape',shapes));
+          catGroups.push(gPills('Carat','carat',caratsCat));
+        }
+        catGroups.push(gStone('Stone Type','stoneType'));
+        catGroups.push(gColor(stoneColourLabel,'gemColor'));
+        catGroups.push(gPills('Quality Tier','quality',qualities));
+      } else if(st==='Station' || st==='Rivi\u00e8re'){
+        catGroups.push(gPills('Station / Stone Size','stationSize',['0.05 ct','0.10 ct','0.15 ct','0.25 ct']));
+        catGroups.push(gChips('Stone Shape','shape',shapes));
+        catGroups.push(gStone('Stone Type','stoneType'));
+        catGroups.push(gColor(stoneColourLabel,'gemColor'));
+        catGroups.push(gPills('Quality Tier','quality',qualities));
+      } else if(st==='Choker'){
+        catGroups.push(gPills('Surface','pattern',['Plain','Pav\u00e9 Line','Full Pav\u00e9']));
+        catGroups.push(gStone('Stone Type','stoneType'));
+        catGroups.push(gColor(stoneColourLabel,'gemColor'));
+      }
+      catGroups.push(gMetal('Metal \u00b7 Tone','bandMetal'));
+      catGroups.push(gPills('Metal \u00b7 Karat','karat',karatOpts));
+      catGroups.push(gPills('Finish','finish',finishOpts));
+      catGroups.push(gText('Engraving','engraving','Clasp Tag \u00b7 Up To 20 Characters'));
+    }
+
+    // ds colors
+    const dsColor=(name,val,bg,border)=>({name,val,swatch:`width:88px;height:44px;border-radius:8px;background:${bg};border:1px solid ${border||'#E4E1D9'};`});
+    const dsColors=[
+      dsColor('Brand Red','#9F0B10',accent),
+      dsColor('Ink','#262626','#262626'),
+      dsColor('Dark Grey','#666666','#666666'),
+      dsColor('Metallic','#8E8E8E','#8E8E8E'),
+      dsColor('Grey','#C0C0C0','#C0C0C0'),
+      dsColor('Light Grey','#EEEEEE','#EEEEEE'),
+      dsColor('Off-white','#F0EAD6','#F0EAD6'),
+      dsColor('Rose Gold','metal',this.metalGrad['Rose Gold'])
+    ];
+
+    return {
+      pageBg: view==='desktop'?'#E8E6DF':'transparent',
+      stageBg:'radial-gradient(130% 100% at 50% 30%,#F6F3EC 0%,#E5E3DC 72%)',
+      accent, config:c,
+      viewTabs, isDesktop:view==='desktop', isMobile:view==='mobile', isDS:view==='ds',
+      isRings, isNonRing:!isRings, collection, collectionName:collection, collectionTabs, collectionMenu, ringModelItems, catGroups,
+      catBigIcon:this.ICON(this.catIcon(collection,72)),
+      showTrustInline: isRings?(step===1):true,
+      isStep1:isRings&&step===1, isStep2:isRings&&step===2, isStep3:isRings&&step===3,
+      steps, mobileSteps, quickViews, quickViewsM,
+      updating:this.state.updating,
+      toggleFullscreen:this.toggleFullscreen, fsOpen:this.state.fsOpen,
+      stageZ: this.state.fsOpen ? 6000 : 10,
+      ringBoxStyle: this.state.fsOpen
+        ? 'position:fixed;inset:0;width:100vw;height:100vh;z-index:4000;background:radial-gradient(130% 100% at 50% 30%,#F6F3EC 0%,#E5E3DC 72%);'
+        : 'position:relative;width:min(560px,90%);height:min(540px,80%);',
+      ringBoxStyleM: this.state.fsOpen
+        ? 'position:fixed;inset:0;width:100vw;height:100vh;z-index:4000;background:radial-gradient(120% 80% at 50% 44%,#F6F3EC 0%,#E4E2DB 70%);'
+        : 'position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);width:300px;height:300px;',
+      mobileMenuOpen:this.state.mobileMenuOpen, toggleMobileMenu:()=>this.setState(s=>({mobileMenuOpen:!s.mobileMenuOpen})), closeMobileMenu:()=>this.setState({mobileMenuOpen:false}),
+      glowColorSolid:this.metalGrad[c.bandMetal],
+      panelTitle: !isRings?collection:(step===2?'Rings':(step===3?'Complete Your Ring':'Rings')),
+      panelSubtitle: !isRings?('Design your '+collection):(step===2?'Select a Certified Lab-Grown Stone':(step===3?'Review & Confirm Your Design':'Design your Rings')),
+      styleItems, headItems, shankItems, widthStops, shapeItems, gemColors, caratItems, qualityItems,
+      centreGems, centreGemsSm, accentGems, accentGemsSm, hasPaveNow, isSplitNow, showSecondBand,
+      showEngraving: c.ringModel!=='Classic Solitaire',
+      bandMetals, headMetals, band2Metals, karatItems, finishItems, sizeOptions, fontChips,
+      qualityToggleLabel: this.state.qualityExpanded?'Hide \u2039':'Details \u203a',
+      toggleQuality:()=>this.setState(s=>({qualityExpanded:!s.qualityExpanded})),
+      sizeOpen:this.state.sizeOpen, toggleSize:()=>this.setState(s=>({sizeOpen:!s.sizeOpen})),
+      onEngrave:(e)=>this.set('engraving',e.target.value), charCount:c.engraving.length,
+      matchBand:()=>this.set('headMetal',c.bandMetal), matchDotStyle:`width:8px;height:8px;border-radius:50%;border:1px solid #C9C5BB;`+(c.headMetal===c.bandMetal?`background:#262626;border-color:#262626;`:`background:transparent;`),
+      matchBand2:()=>this.set('band2Metal',c.bandMetal), matchDot2Style:`width:8px;height:8px;border-radius:50%;border:1px solid #C9C5BB;`+(c.band2Metal===c.bandMetal?`background:#262626;border-color:#262626;`:`background:transparent;`),
+      inventory, compare:this.state.compare, toggleCompare:()=>this.setState(s=>({compare:!s.compare})),
+      compareToggleStyle:`padding:5px 12px;border-radius:999px;cursor:pointer;font-size:14px;font-family:'Satoshi',sans-serif;`+(this.state.compare?`background:#262626;color:#fff;border:1px solid #262626;`:`background:#fff;color:#666;border:1px solid #D8D4CA;`),
+      summary, trustItems, trustInline,
+      priceFormatted:this.inr(isRings?p.total:this.catPrice(collection,csel)), metalFormatted:this.inr(p.metal), diamondFormatted:this.inr(p.diamond), makingFormatted:this.inr(p.making),
+      showBreakup:this.state.showBreakup, toggleBreakup:()=>this.setState(s=>({showBreakup:!s.showBreakup})), breakupLabel:this.state.showBreakup?'Hide breakup \u203a':'Price Breakup \u203a',
+      nextStep:this.nextStep, goStep:(n)=>this.goStep(n),
+      wishlist:this.state.wishlist, toggleWishlist:()=>this.setState(s=>({wishlist:!s.wishlist})), heartColor:this.state.wishlist?accent:'#9A958B', heartFill:this.state.wishlist?accent:'none',
+      mobileTabs, mTabStyle:this.state.mobileTab==='Style', mTabHead:this.state.mobileTab==='Head', mTabShank:this.state.mobileTab==='Shank', mTabStone:this.state.mobileTab==='Stone', mTabMetal:this.state.mobileTab==='Metal', mTabSize:this.state.mobileTab==='Size',
+      dsColors,
+      stageRef:this.stageRef, ringLoading:this.state.ringLoading, ringError:this.state.ringError,
+      showWidget: view==='desktop', chatOpen:this.state.chatOpen, chat, chatRef:this.chatRef,
+      toggleChat:()=>this.setState(s=>({chatOpen:!s.chatOpen})), openChat:()=>this.setState({chatOpen:true}), closeChat:()=>this.setState({chatOpen:false}),
+      sendChat:this.sendChat, onChatKey:this.onChatKey
+    };
+  }
+}
+</script>
+</body>
+</html>
